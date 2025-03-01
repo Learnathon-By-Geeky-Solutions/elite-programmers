@@ -1,9 +1,9 @@
 ﻿using ErrorOr;
 using FluentValidation;
 using MediatR;
-using OPS.Application.Contracts.DtoExtensions;
 using OPS.Application.Contracts.Dtos;
 using OPS.Application.CrossCutting.Constants;
+using OPS.Application.Interfaces;
 using OPS.Domain;
 using OPS.Domain.Contracts.Core.Authentication;
 using OPS.Domain.Entities.User;
@@ -20,11 +20,11 @@ public record RegisterCommand(
 public class RegisterCommandHandler(
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
-    IJwtGenerator jwtGenerator) : IRequestHandler<RegisterCommand, ErrorOr<AuthenticationResult>>
+    IAuthService authService) : IRequestHandler<RegisterCommand, ErrorOr<AuthenticationResult>>
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
-    private readonly IJwtGenerator _jwtGenerator = jwtGenerator;
+    private readonly IAuthService _authService = authService;
 
     public async Task<ErrorOr<AuthenticationResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public class RegisterCommandHandler(
         var result = await _unitOfWork.CommitAsync(cancellationToken);
 
         return result > 0
-            ? new AuthenticationResult(_jwtGenerator.CreateToken(account), account.ToDto())
+            ? _authService.AuthenticateUser(account)
             : Error.Failure();
     }
 }

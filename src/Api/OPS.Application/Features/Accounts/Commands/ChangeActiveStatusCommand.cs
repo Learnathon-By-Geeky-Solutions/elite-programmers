@@ -7,14 +7,14 @@ using OPS.Domain;
 
 namespace OPS.Application.Features.Accounts.Commands;
 
-public record ChangeAccountStatus(Guid AccountId) : IRequest<ErrorOr<AccountResponse>>;
+public record ChangeActiveStatusCommand(Guid AccountId) : IRequest<ErrorOr<AccountResponse>>;
 
-public class ChangeAccountStatusCommandHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<ChangeAccountStatus, ErrorOr<AccountResponse>>
+public class ChangeActiveStatusCommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<ChangeActiveStatusCommand, ErrorOr<AccountResponse>>
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<ErrorOr<AccountResponse>> Handle(ChangeAccountStatus request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<AccountResponse>> Handle(ChangeActiveStatusCommand request, CancellationToken cancellationToken)
     {
         var account = await _unitOfWork.Account.GetAsync(request.AccountId, cancellationToken);
 
@@ -30,9 +30,9 @@ public class ChangeAccountStatusCommandHandler(IUnitOfWork unitOfWork)
     }
 }
 
-public class ChangeAccountStatusValidator : AbstractValidator<ChangeAccountStatus>
+public class ChangeActiveStatusValidator : AbstractValidator<ChangeActiveStatusCommand>
 {
-    public ChangeAccountStatusValidator()
+    public ChangeActiveStatusValidator()
     {
         RuleFor(x => x.AccountId)
             .NotEmpty()

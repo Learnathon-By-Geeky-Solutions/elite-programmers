@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using OPS.Application.CrossCutting.Constants;
 using OPS.Domain.Contracts.Core.Authentication;
 using OPS.Domain.Contracts.Core.EmailSender;
 using OPS.Domain.Enums;
@@ -141,7 +142,7 @@ public static class AppConfigurations
         configuration.Bind(nameof(EmailSettings), settings);
 
         services
-            .AddFluentEmail(settings.Email, settings.Name)
+            .AddFluentEmail(settings.Email, ProjectConstants.ProjectName)
             .AddSmtpSender(settings.Server, settings.Port, settings.Email, settings.Password);
 
         return services;

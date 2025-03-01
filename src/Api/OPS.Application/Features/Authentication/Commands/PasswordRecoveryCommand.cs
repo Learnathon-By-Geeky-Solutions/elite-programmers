@@ -1,17 +1,15 @@
 ﻿using ErrorOr;
 using FluentValidation;
 using MediatR;
-using OPS.Application.Contracts.DtoExtensions;
 using OPS.Application.Contracts.Dtos;
 using OPS.Application.CrossCutting.Constants;
+using OPS.Application.Interfaces;
 using OPS.Domain;
 using OPS.Domain.Contracts.Core.Authentication;
-using OPS.Domain.Entities.User;
-using OPS.Domain.Enums;
 
 namespace OPS.Application.Features.Authentication.Commands;
 
-public record ResetPasswordCommand(
+public record PasswordRecoveryCommand(
     string Email,
     string Password,
     string Otp) : IRequest<ErrorOr<AuthenticationResult>>;
@@ -19,15 +17,15 @@ public record ResetPasswordCommand(
 public class ResetPasswordCommandHandler(
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
-    IJwtGenerator jwtGenerator) : IRequestHandler<ResetPasswordCommand, ErrorOr<AuthenticationResult>>
+    IAuthService authService) : IRequestHandler<PasswordRecoveryCommand, ErrorOr<AuthenticationResult>>
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
-    private readonly IJwtGenerator _jwtGenerator = jwtGenerator;
+    private readonly IAuthService _authService = authService;
 
-    public async Task<ErrorOr<AuthenticationResult>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<AuthenticationResult>> Handle(PasswordRecoveryCommand request, CancellationToken cancellationToken)
     {
-        var account = await _unitOfWork.Account.GetWithDetails(request.Email, cancellationToken);
+        var account = await _unitOfWork.Account.GetByEmailAsync(request.Email, cancellationToken);
 
         if (account == null) return Error.NotFound();
 
@@ -38,23 +36,21 @@ public class ResetPasswordCommandHandler(
 
         var (hashedPassword, salt) = _passwordHasher.HashPassword(request.Password);
 
-
         account.PasswordHash = hashedPassword;
         account.Salt = salt;
 
         var result = await _unitOfWork.CommitAsync(cancellationToken);
 
         return result > 0
-            ? new AuthenticationResult(_jwtGenerator.CreateToken(account), account.ToDto())
+            ? _authService.AuthenticateUser(account)
             : Error.Failure();
     }
 }
 
-public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
+public class ResetPasswordCommandValidator : AbstractValidator<PasswordRecoveryCommand>
 {
     public ResetPasswordCommandValidator()
     {
-
         RuleFor(x => x.Email)
             .NotEmpty()
             .Matches(ValidationConstants.EmailRegex);

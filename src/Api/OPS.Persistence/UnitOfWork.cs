@@ -3,7 +3,6 @@ using OPS.Domain;
 using OPS.Domain.Contracts;
 using OPS.Domain.Contracts.Repository;
 using OPS.Domain.Entities.Common;
-using OPS.Persistence.Repositories;
 
 namespace OPS.Persistence;
 
@@ -19,8 +18,8 @@ internal class UnitOfWork(
     IMcqOptionRepository mcqOptionRepository,
     IProfileRepository profileRepository,
     IProfileSocialRepository profileSocialRepository,
-    IProblemSubmissionRepository problemSubmissionRepository
-    ) : IUnitOfWork
+    IProblemSubmissionRepository problemSubmissionRepository,
+    ICloudFileRepository cloudFileRepository) : IUnitOfWork
 {
     private readonly AppDbContext _dbContext = dbContext;
 
@@ -35,6 +34,8 @@ internal class UnitOfWork(
     public IProfileRepository Profile { get; } = profileRepository;
     public IProfileSocialRepository ProfileSocial { get; } = profileSocialRepository;
     public IProblemSubmissionRepository ProblemSubmission { get; } = problemSubmissionRepository;
+    public ICloudFileRepository CloudFile { get; } = cloudFileRepository;
+
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         var softDeletableEntities = _dbContext.ChangeTracker

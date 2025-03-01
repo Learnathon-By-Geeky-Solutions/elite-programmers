@@ -1,7 +1,5 @@
 ﻿using OPS.Domain.Contracts;
 using OPS.Domain.Contracts.Repository;
-using OPS.Domain.Entities.Exam;
-using OPS.Domain.Entities.Submit;
 
 namespace OPS.Domain;
 
@@ -18,6 +16,7 @@ public interface IUnitOfWork : IDisposable
     IProfileRepository Profile { get; }
     IProfileSocialRepository ProfileSocial { get; }
     IProblemSubmissionRepository ProblemSubmission { get; }
+    ICloudFileRepository CloudFile { get; }
 
     Task<int> CommitAsync(CancellationToken cancellationToken = default);
 }

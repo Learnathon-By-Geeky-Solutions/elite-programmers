@@ -9,9 +9,11 @@ public class UserInfoProvider(IHttpContextAccessor httpContextAccessor) : IUserI
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-    public string? AccountId()
+    public Guid? AccountId()
     {
-        return _httpContextAccessor.HttpContext?.User.FindFirst("accountId")?.Value;
+        var accountIdStr = _httpContextAccessor.HttpContext?.User.FindFirst("accountId")?.Value;
+
+        return Guid.TryParse(accountIdStr, out var accountId) ? accountId : null;
     }
 
     public string? Username()

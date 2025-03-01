@@ -6,7 +6,6 @@ public class EmailSettings
 
     public string Server { get; init; } = null!;
     public int Port { get; init; }
-    public string Name { get; init; } = null!;
     public string Email { get; init; } = null!;
 
     public string Password

@@ -15,7 +15,7 @@ public class GetAllAccountsQueryHandler(IUnitOfWork unitOfWork)
 
     public async Task<ErrorOr<List<AccountResponse>>> Handle(GetAllAccountsQuery request, CancellationToken cancellationToken)
     {
-        var accounts = await _unitOfWork.Account.GetAsync(cancellationToken);
+        var accounts = await _unitOfWork.Account.GetAllWithDetails(cancellationToken);
 
         return accounts.Select(a => a.ToDto()).ToList();
     }

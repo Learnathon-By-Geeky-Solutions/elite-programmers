@@ -2,5 +2,5 @@
 
 public class ProjectConstants
 {
-    public const string ProjectName = "Online Proctoring System";
+    public const string ProjectName = "TrueTest";
 }

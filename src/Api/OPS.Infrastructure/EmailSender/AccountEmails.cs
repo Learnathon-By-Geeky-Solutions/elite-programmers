@@ -13,7 +13,7 @@ public class AccountEmails(IFluentEmail fluentEmail) : IAccountEmails
     {
         var email = _fluentEmail
             .To(emailAddress)
-            .Subject("Online Proctoring System - Email Verification")
+            .Subject($"{ProjectConstants.ProjectName} - Email Verification")
             .Body($"""
                      <body style='font-family: Inter, Arial, sans-serif;'>
                        <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>
@@ -31,7 +31,7 @@ public class AccountEmails(IFluentEmail fluentEmail) : IAccountEmails
                        </div>
                      </body>
                    """,
-                true);
+                isHtml: true);
 
         Send(email, cancellationToken);
     }

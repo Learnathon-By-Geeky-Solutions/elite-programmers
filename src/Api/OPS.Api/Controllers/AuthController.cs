@@ -28,8 +28,8 @@ public class AuthController(IMediator mediator) : BaseApiController
         return ToResult(registration);
     }
 
-    [HttpPost("ResetPassword")]
-    public async Task<IActionResult> ResetPasswordAsync(ResetPasswordCommand command)
+    [HttpPost("PasswordRecovery")]
+    public async Task<IActionResult> PasswordRecoveryAsync(PasswordRecoveryCommand command)
     {
         var result = await _mediator.Send(command);
 

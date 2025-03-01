@@ -4,7 +4,7 @@ namespace OPS.Domain.Contracts.Core.Authentication;
 
 public interface IUserInfoProvider
 {
-    string? AccountId();
+    Guid? AccountId();
     string? Username();
     string? Email();
     List<RoleType> Roles();

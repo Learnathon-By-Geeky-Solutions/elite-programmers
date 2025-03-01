@@ -1,4 +1,6 @@
-﻿namespace OPS.Application.Contracts.Dtos;
+﻿using OPS.Domain.Enums;
+
+namespace OPS.Application.Contracts.Dtos;
 
 public record AuthenticationResult(
     string Token,
@@ -11,5 +13,24 @@ public record AccountResponse(
     string Email,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    bool IsActive
+    bool IsActive,
+    List<RoleType> Roles,
+    ProfileResponse? Profile
+);
+
+public record ProfileResponse(
+    Guid ProfileId,
+    string? FirstName,
+    string? LastName,
+    string? BioMarkdown,
+    string? InstituteName,
+    string? PhoneNumber,
+    Guid? ImageFileId,
+    List<ProfileSocialRequest> ProfileSocials
+);
+
+public record ProfileSocialRequest(
+    Guid? Id,
+    string? Name,
+    string? Link
 );

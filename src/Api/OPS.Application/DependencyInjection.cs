@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using OPS.Application.CrossCutting.BackgroundServices;
 using OPS.Application.CrossCutting.Behaviors;
+using OPS.Application.Interfaces;
+using OPS.Application.Services;
 
 namespace OPS.Application;
 
@@ -18,6 +20,8 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining(typeof(DependencyInjection), includeInternalTypes: true);
 
         services.AddHostedService<OtpCleanupService>();
+
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
