@@ -14,7 +14,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            {children}
+           <div className={`${theme ? "bg-gray-900 text-white" : "bg-white text-black"} min-h-screen`}>
+           {children}
+           </div>
         </ThemeContext.Provider>
     );
 };

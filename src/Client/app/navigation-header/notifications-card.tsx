@@ -79,17 +79,6 @@ export default function Component(props: CardProps) {
               </div>
             }
           />
-          {/*<Tab*/}
-          {/*  key="unread"*/}
-          {/*  title={*/}
-          {/*    <div className="flex items-center space-x-2">*/}
-          {/*      <span>Unread</span>*/}
-          {/*      <Chip size="sm" variant="flat">*/}
-          {/*        3*/}
-          {/*      </Chip>*/}
-          {/*    </div>*/}
-          {/*  }*/}
-          {/*/>*/}
         </Tabs>
       </CardHeader>
       <CardBody className="w-full gap-0 p-0">

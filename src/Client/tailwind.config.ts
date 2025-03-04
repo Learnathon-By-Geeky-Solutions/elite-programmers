@@ -11,7 +11,7 @@ const config = {
   theme: {
     extend: {},
   },
-  darkMode: 'class',
+  darkMode: ['class', '[data-theme="dark"]'],
   plugins: [heroui()],
 }
 

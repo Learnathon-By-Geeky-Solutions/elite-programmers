@@ -6,22 +6,14 @@
   --background: #ffffff;
   --foreground: #171717;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  padding: 1rem;
-}
-body.dark {
-  background-color: #333;
-  color: #eee;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .dark {
-  @apply bg-gray-900 text-white;
+  height: 100%;
+  background-color:#313132;
+  color: #eee;
 }

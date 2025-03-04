@@ -1,59 +1,51 @@
-"use client";
+'use client';
 
-import React from "react";
-import {Card, CardHeader, CardBody, Button, Avatar,Chip} from "@nextui-org/react";
-import '../../../styles/globals.css'
-import { SocialIcon } from 'react-social-icons'
+import { Avatar ,Link} from '@heroui/react';
+import React from 'react';
 
-export default function Page({ params }: { params: Promise<{ id: string }> }) {
-{
-    const paramsId=React.use(params);
-   return(
-       <div className="flex h-full  w-full items-start justify-center">
-           <h3>Profile : {paramsId.id}</h3>
-           <Card className="my-10 w-[900px]">
-               <CardHeader className="relative flex h-[200px] flex-col justify-end overflow-visible bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400">
-                   <Avatar className="h-44 w-44 translate-y-12" src=""/>
-                   <Button
-                       className="absolute right-3 top-3 bg-white/20 text-white dark:bg-black/20" radius="full" size="sm" variant="light">
-                       Edit Profile
-                   </Button>
-               </CardHeader>
-               <CardBody>
-                   <div className="pb-4 pt-6">
-                       <p className="text-large font-medium">Tony Reichert</p>
-                       <p className="max-w-[90%] text-small text-default-400">tonyreichert@gmail.com</p>
-                       <div className="flex gap-2 pb-1 pt-2">
-                           <Chip variant="flat">Design</Chip>
-                           <Chip variant="flat">UI/UX</Chip>
-                           <Chip variant="flat">Photography</Chip>
-                       </div>
-                       <p className="py-4 text-small text-foreground">
-                           Creator of Radify Icons Set. 500+ icons in 6 styles, SVG and Figma files, and more.
-                       </p>
+const ProfilePage = () => {
+  return (
+    <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center">
+      <div className=" rounded-2xl shadow-lg p-8 w-[600px]">
+        <div className="flex items-center gap-2 mb-6">
+          <Avatar
+            src="" 
+            alt="Profile"
+            className="rounded-full w-32 h-32 object-cover"
+          />
+          <div>
+          <h2 className="text-2xl font-semibold mb-2">Username</h2>
+          <p className="text-gray-400 mb-4">@user</p>
+            </div>
+        </div>
 
-                         <div className='space-y-1 p-2'>
-                             <h3 className='text-lg font-semibold'>Location  </h3>
-                             <p className="text-sm bg-gray-100 p-1 ml-3">California</p>
-                         </div>
-                         <div className='space-y-1 p-2'>
-                           <h3 className='text-lg font-semibold'>Phone Number </h3>
-                           <p className="bg-gray-100 p-1 text-sm ml-3">01526688744</p>
-                        </div>
-                        <div className='space-y-1 p-2'>
-                           <h3 className='text-lg font-semibold'>Institution  </h3>
-                           <p className="bg-gray-100 p-1 text-sm ml-3">Lorem ipsum University</p>
-                         </div>
-                          <div className='space-y-1 p-2'>
-                              <h3 className='text-lg font-semibold'>Social Account  </h3>
-                              <p className='space-x-2'><SocialIcon url="https://twitter.com" />
-                                  <SocialIcon  url="https://facebook.com"/>
-                                  <SocialIcon  url="https://linkedin.com" /></p>
-                          </div>
+        <p className="text-sm mb-4">
+          This is my bio section. You can add a short description about yourself here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </p>
 
-                   </div>
-               </CardBody>
-           </Card>
-       </div>
-   )
-}}
+       <hr/>
+        <div className="space-y-2 mb-4 mt-4">
+          <p className="text-sm">
+            <strong>Email:</strong> <a href="mailto:info@user.com" className="text-blue-400">info@rawfin.com</a>
+          </p>
+          <p className="text-sm">
+            <strong>Institute:</strong> Lorem University
+          </p>
+          <p className="text-sm">
+            <strong>Phone:</strong> +880 123456789
+          </p>
+          <p className="text-sm">
+            <strong>Joined:</strong> 28 Nov 2026, 10:08 PM
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <button className="bg-blue-600 hover:bg-blue-700 font-semibold py-2 px-4 rounded">
+           <Link className='text-white' href="/myprofile/1/update-profile"> Update Profile</Link>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfilePage;

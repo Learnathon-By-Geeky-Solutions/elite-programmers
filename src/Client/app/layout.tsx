@@ -1,12 +1,11 @@
 'use client'
 import { Providers } from './providers'
-import NavBar from './navigation-header/page'
-import { usePathname } from "next/navigation";
+import NavBar from './navigation-header/NavBar'
 import '../styles/globals.css'
 import React, { useState,useEffect } from 'react'; 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    const path = usePathname();
+   
     const [theme, setTheme] = useState('light'); 
     useEffect(() => {
       const storedTheme = localStorage.getItem('theme');
@@ -24,9 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en">
             <body className={theme === 'dark' ? 'dark' : ''}> 
                 <Providers>
-                    {!path.includes('login') && !path.includes('registration')
-                        && !path.includes('settings') && !path.includes('myprofile') && !path.includes('otp') && !path.includes('exam-review') && <NavBar onThemeToggle={handleThemeToggle} />} {/* Pass callback to NavBar */}
-                    <main className="h-screen">{children}</main> 
+                   <NavBar onThemeToggle={handleThemeToggle} />
+                    <main className='h-screen'>{children}</main> 
                 </Providers>
             </body>
         </html>
