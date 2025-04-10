@@ -39,6 +39,13 @@ interface ExamData {
   submissions: ExamSubmission[]
 }
 
+/**
+ * Renders the exam submission review interface.
+ *
+ * This React component displays exam details including overall scores, candidate-specific submissions, and question data (both code and written). It allows users to select a candidate via a dropdown, navigate between submissions, review individual question details (with test case results for code questions), and flag questions for further review.
+ *
+ * @returns The rendered exam review interface.
+ */
 export default function Component() {
   const examData: ExamData[] = [
     {

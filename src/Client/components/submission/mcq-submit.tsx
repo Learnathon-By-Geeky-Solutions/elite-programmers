@@ -15,6 +15,21 @@ interface PageProps {
  readonly options:string[]
 }
 
+/**
+ * Renders a multiple-choice question card.
+ *
+ * This React component displays a card containing a multiple-choice question along with its title, description, and point value.
+ * It renders checkboxes for each provided option and updates the selected answers using a functional state update. When a checkbox
+ * is toggled, the component adds the option to the answer array if selected or removes it if deselected.
+ *
+ * @param props - The component properties:
+ *   - question: An object with the question details (id, title, description, and points).
+ *   - answers: An object mapping question IDs to their currently selected answers.
+ *   - setAnswers: A function to update the answers state.
+ *   - options: An array of strings representing the available answer options.
+ *
+ * @returns A JSX element representing the multiple-choice question card.
+ */
 export default function MCQSubmission({ question,answers,setAnswers,options}: PageProps) {
   const handleCheckboxChange = (questionId: number, option: string, isChecked: boolean) => {
       setAnswers((prevAnswers) => {

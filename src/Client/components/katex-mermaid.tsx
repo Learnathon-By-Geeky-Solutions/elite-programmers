@@ -100,6 +100,13 @@ const Code: React.FC<CodeProps> = ({ children = [], className = '' }) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MarkdownCode = (props: any) => <Code {...props} />
+/**
+ * Renders a Markdown editor with live preview and enhanced code block rendering.
+ *
+ * This component utilizes the MDEditor to provide a rich Markdown editing experience. It initializes with default Markdown content and updates its state as the user edits the text. The editor is configured with a fixed height, an input placeholder, and preview options that include HTML sanitization via rehypeSanitize and custom code rendering through the MarkdownCode component for displaying diagrams and mathematical expressions.
+ *
+ * @returns A React element representing the configured Markdown editor.
+ */
 export default function MdEditor() {
   const [value, setValue] = useState(mdMixed)
   return (

@@ -37,6 +37,16 @@ type User = {
   action?: string
 }
 
+/**
+ * Renders a user management interface with search, filtering, pagination, and modal dialogs for editing or deleting records.
+ *
+ * Upon mounting, the component fetches user data from the "Account/All" API endpoint and manages local state for the
+ * list of users, search filter, pagination, and visibility of edit and delete confirmation modals. The UI is composed of
+ * a searchable table that displays users' details and provides action buttons for editing and deleting, along with
+ * pagination controls to navigate through the records.
+ *
+ * @returns A React element representing the user management interface.
+ */
 export default function Component() {
   const [filterValue, setFilterValue] = useState('')
   const rowsPerPage = 10

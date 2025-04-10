@@ -9,6 +9,15 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import isValidPassword from '@/components/check-valid-password'
 import ROUTES from '@/constants/route'
 
+/**
+ * Renders the account settings form.
+ *
+ * Displays a card with a form that lets users update their account details, including the username and password.
+ * The username is pre-populated from the URL search parameters. The form validates that the username has at least 4 characters,
+ * the new password matches its confirmation, and the new password meets complexity requirements (e.g., contains uppercase,
+ * lowercase, number, and special character). Upon a successful API update, the user is redirected based on their role.
+ * Toggle buttons allow users to show or hide password inputs.
+ */
 export default function Component() {
   const [newconfirmpassword, setNewconfirmpassword] = useState('')
   const [error, setError] = useState('')

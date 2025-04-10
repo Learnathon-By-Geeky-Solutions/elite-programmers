@@ -7,6 +7,13 @@ import api from '@/utils/api'
 import FormattedDate from '../format-date-time'
 import { ProfileLink, User } from '../types/profile'
 
+/**
+ * Renders the user profile page.
+ *
+ * This component fetches user profile details from the '/User/Details' API endpoint and displays the information, including the user's avatar, name, contact details, and profile links. A loading state is shown while data is being retrieved, and a fallback profile is used if the API call fails.
+ *
+ * @returns The React element representing the user profile page.
+ */
 export default function ProfilePage() {
   const path = usePathname()
   const [route, setRoute] = useState('')

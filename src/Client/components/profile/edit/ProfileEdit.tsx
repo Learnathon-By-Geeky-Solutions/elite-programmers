@@ -11,6 +11,20 @@ interface ProfileDetailsProps {
  readonly setFormData?: React.Dispatch<React.SetStateAction<FormData>>
 }
 
+/**
+ * Renders a user profile editing form.
+ *
+ * This component provides an interface for updating profile details such as name, bio, contact information, and social links.
+ * It supports both controlled and uncontrolled modes:
+ * - When both `formData` and `setFormData` are provided, the component uses them for external state management.
+ * - Otherwise, it manages its own local state.
+ *
+ * On mount, it fetches existing profile data from an API and populates the form if available. Users can add, update, or remove social links and upload a profile image.
+ *
+ * @param formData - Optional profile data for controlled usage.
+ * @param setFormData - Optional state updater for controlled usage.
+ * @returns A JSX element representing the profile editing form.
+ */
 export default function ProfileEdit({ formData, setFormData }: ProfileDetailsProps) {
   const [localFormData, setLocalFormData] = useState<FormData>({
     firstName: '',

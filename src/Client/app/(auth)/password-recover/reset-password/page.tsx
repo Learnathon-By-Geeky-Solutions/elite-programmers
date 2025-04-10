@@ -9,6 +9,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useState, Suspense } from 'react'
 import toast from 'react-hot-toast'
 
+/**
+ * Renders a password reset form that enables users to update their password.
+ *
+ * This component extracts the email and OTP from the URL's search parameters and provides
+ * input fields for the new password and its confirmation. It validates that the passwords match
+ * and meet complexity requirements before sending a POST request to the password recovery API.
+ * On successful reset, a success message is displayed and the user is redirected to the sign-in page;
+ * otherwise, an error message is shown.
+ */
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')

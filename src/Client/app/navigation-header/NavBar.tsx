@@ -23,6 +23,18 @@ import NotificationsCard from '@/app/navigation-header/notifications-card'
 import ThemeSwitch from '../ThemeSwitch'
 import { useAuth } from '@/context/AuthProvider'
 
+/**
+ * Renders a responsive navigation bar with theme toggling, notifications, and user account actions.
+ *
+ * The navigation bar features:
+ * - A theme switcher to toggle between light and dark modes.
+ * - A notifications popover displaying alerts via a notifications card.
+ * - A user dropdown that shows profile details and provides options to view the profile, adjust account settings, or log out.
+ *
+ * The component leverages the authentication context to retrieve the current user and the logout operation.
+ *
+ * @returns The JSX element representing the navigation bar.
+ */
 export default function Component() {
   const { user, logout } = useAuth()
   return (

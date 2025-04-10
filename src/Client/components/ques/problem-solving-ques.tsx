@@ -21,6 +21,16 @@ interface Problem {
   testCases: TestCase[]
 }
 
+/**
+ * Renders a paginated form for managing problem solving questions and their test cases.
+ *
+ * This component maintains a list of problems—each with an associated question and test cases—and provides
+ * helper functions to update them. It supports adding new test cases and problems, deleting or refreshing
+ * test cases, and handling pagination to display one problem per page. User actions like deleting or refreshing
+ * test cases trigger corresponding toast notifications.
+ *
+ * @returns The JSX element representing the problem solving question form.
+ */
 export default function ProblemSolvingForm() {
   const [problems, setProblems] = useState<Problem[]>([
     { id: uuidv4(), question: '', testCases: [{ id: uuidv4(), input: '', output: '' }] },
