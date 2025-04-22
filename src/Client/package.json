@@ -33,7 +33,7 @@
     "he": "^1.2.0",
     "js-cookie": "^3.0.5",
     "katex": "^0.16.21",
-    "lucide-react": "^0.476.0",
+    "lucide-react": "^0.486.0",
     "mermaid": "^11.6.0",
     "next": "^15.2.2",
     "next-remove-imports": "^1.0.12",
