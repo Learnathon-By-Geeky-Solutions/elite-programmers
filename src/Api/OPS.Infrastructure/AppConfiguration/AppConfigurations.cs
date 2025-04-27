@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +14,12 @@ namespace OPS.Infrastructure.AppConfiguration;
 
 public static class AppConfigurations
 {
+    /// <summary>
+    /// Registers and configures infrastructure services, middleware, and logging for the application.
+    /// </summary>
+    /// <param name="configuration">Application configuration settings.</param>
+    /// <param name="hostBuilder">The host builder to configure logging.</param>
+    /// <returns>The updated service collection with infrastructure services registered.</returns>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,

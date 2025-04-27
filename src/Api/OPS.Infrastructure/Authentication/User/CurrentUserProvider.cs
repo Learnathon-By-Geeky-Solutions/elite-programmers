@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using OPS.Domain.Contracts.Core.Authentication;
 using OPS.Domain.Enums;
@@ -54,6 +54,13 @@ public class CurrentUserProvider(IHttpContextAccessor httpContextAccessor) : IUs
             .ToList();
     }
 
+    /// <summary>
+    /// Retrieves the current user's account ID from claims.
+    /// </summary>
+    /// <returns>The account ID as a <see cref="Guid"/>.</returns>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown if the "AccountId" claim is missing or cannot be parsed as a valid <see cref="Guid"/>.
+    /// </exception>
     public Guid AccountId()
     {
         var accountIdStr = _httpContextAccessor.HttpContext?.User.FindFirst("AccountId")?.Value;
@@ -63,12 +70,22 @@ public class CurrentUserProvider(IHttpContextAccessor httpContextAccessor) : IUs
             : throw new UnauthorizedAccessException("Account ID is missing or invalid.");
     }
 
+    /// <summary>
+    /// Attempts to retrieve and parse the "AccountId" claim from the current user as a <see cref="Guid"/>.
+    /// </summary>
+    /// <returns>The parsed <see cref="Guid"/> if the claim exists and is valid; otherwise, <c>null</c>.</returns>
     public Guid? TryGetAccountId()
     {
         var accountIdStr = _httpContextAccessor.HttpContext?.User.FindFirst("AccountId")?.Value;
         return Guid.TryParse(accountIdStr, out var id) ? id : null;
     }
 
+    /// <summary>
+    /// Decodes the current user's claims into a dictionary mapping claim types to their values.
+    /// </summary>
+    /// <returns>
+    /// A dictionary where each key is a claim type and each value is either a string or a list of strings if multiple claims of the same type exist.
+    /// </returns>
     public dynamic DecodeToken()
     {
         var claims = _httpContextAccessor.HttpContext?.User.Claims

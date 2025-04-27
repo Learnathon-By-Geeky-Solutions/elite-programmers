@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Microsoft.Extensions.Caching.Memory;
@@ -12,6 +12,12 @@ public class DriveServiceProvider(IMemoryCache memoryCache, GoogleCloudSettings 
     private readonly GoogleCloudSettings _settings = googleCloudOptions;
     private readonly ILogger _logger = logger;
 
+    /// <summary>
+    /// Creates and configures a Google Drive service client using credentials from the configured file.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="DriveService"/> instance authenticated with the provided credentials, or an uninitialized instance if the credentials file is missing or invalid.
+    /// </returns>
     public DriveService GetDriveService()
     {
         if (!File.Exists(_settings.Credentials) || File.ReadAllLines(_settings.Credentials).Length < 10)
@@ -36,6 +42,10 @@ public class DriveServiceProvider(IMemoryCache memoryCache, GoogleCloudSettings 
         return driveService;
     }
 
+    /// <summary>
+    /// Searches for a Google Drive folder by name and caches its ID if found.
+    /// </summary>
+    /// <param name="driveService">The DriveService instance used to query Google Drive.</param>
     private void SetFolderId(DriveService driveService)
     {
         const string cacheKey = "TT_FolderId";

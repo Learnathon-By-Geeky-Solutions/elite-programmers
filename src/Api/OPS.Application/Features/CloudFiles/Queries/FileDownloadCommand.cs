@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+using ErrorOr;
 using FluentValidation;
 using MediatR;
 using OPS.Application.Dtos;
@@ -13,6 +13,14 @@ public class FileDownloadCommandHandler(ICloudFileService cloudFileService)
 {
     private readonly ICloudFileService _cloudFileService = cloudFileService;
 
+    /// <summary>
+    /// Handles a file download request by retrieving the file with the specified ID.
+    /// </summary>
+    /// <param name="request">The file download command containing the file ID.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// An <see cref="ErrorOr{FileDownloadResponse}"/> containing the file download response if found, or a not found error if the file does not exist.
+    /// </returns>
     public async Task<ErrorOr<FileDownloadResponse>> Handle(FileDownloadCommand request,
         CancellationToken cancellationToken)
     {
@@ -26,6 +34,9 @@ public class FileDownloadCommandHandler(ICloudFileService cloudFileService)
 
 public class FileDownloadCommandValidator : AbstractValidator<FileDownloadCommand>
 {
+    /// <summary>
+    /// Validates that the <c>FileId</c> property of a <see cref="FileDownloadCommand"/> is not empty.
+    /// </summary>
     public FileDownloadCommandValidator()
     {
         RuleFor(x => x.FileId).NotEmpty();

@@ -1,4 +1,4 @@
-﻿using OPS.Application.Dtos;
+using OPS.Application.Dtos;
 using OPS.Domain.Entities.User;
 using OPS.Domain.Enums;
 
@@ -45,6 +45,11 @@ public static class AccountMappers
         );
     }
 
+    /// <summary>
+    /// Maps a <see cref="Profile"/> entity to a <see cref="ProfileResponse"/> DTO, including image and profile links. Returns null if the profile is null.
+    /// </summary>
+    /// <param name="profile">The profile entity to map, or null.</param>
+    /// <returns>A <see cref="ProfileResponse"/> DTO representing the profile, or null if the input is null.</returns>
     public static ProfileResponse? MapToDto(this Profile? profile)
     {
         return profile is null

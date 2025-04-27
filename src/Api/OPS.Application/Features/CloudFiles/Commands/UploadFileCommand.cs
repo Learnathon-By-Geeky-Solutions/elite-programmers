@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+using ErrorOr;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +21,14 @@ public class UploadFileCommandHandler(
     private readonly IUserInfoProvider _userInfoProvider = userInfoProvider;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
+    /// <summary>
+    /// Handles the upload of a file by saving it to cloud storage and persisting its metadata.
+    /// </summary>
+    /// <param name="request">The command containing the file to upload.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>
+    /// An <see cref="ErrorOr{CloudFileResponse}"/> containing the uploaded file's details on success, or an error if the upload or persistence fails.
+    /// </returns>
     public async Task<ErrorOr<CloudFileResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
         var cloudFile = await _cloudFileService.UploadAsync(request.File, cancellationToken);
@@ -43,6 +51,9 @@ public class UploadFileCommandHandler(
 
 public class UploadFileCommandValidator : AbstractValidator<UploadFileCommand>
 {
+    /// <summary>
+    /// Validates the <c>UploadFileCommand</c> to ensure a file is provided, is not empty, and does not exceed 100 KB in size.
+    /// </summary>
     public UploadFileCommandValidator()
     {
         RuleFor(x => x.File)

@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+using ErrorOr;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +17,12 @@ public class EditFileCommandHandler(ICloudFileService cloudFileService, IUnitOfW
     private readonly ICloudFileService _cloudFileService = cloudFileService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
+    /// <summary>
+    /// Handles the edit file command by uploading a new file, replacing the existing cloud file, and returning the updated file information.
+    /// </summary>
+    /// <param name="request">The command containing the ID of the file to replace and the new file to upload.</param>
+    /// <param name="cancellationToken">Token for cancelling the operation.</param>
+    /// <returns>An <see cref="ErrorOr{CloudFileResponse}"/> containing the updated file information or an error if the operation fails.</returns>
     public async Task<ErrorOr<CloudFileResponse>> Handle(EditFileCommand request, CancellationToken cancellationToken)
     {
         var cloudFile = await _cloudFileService.UploadAsync(request.File, cancellationToken);
@@ -48,6 +54,9 @@ public class EditFileCommandHandler(ICloudFileService cloudFileService, IUnitOfW
 
 public class EditFileCommandValidator : AbstractValidator<EditFileCommand>
 {
+    /// <summary>
+    /// Validates the <see cref="EditFileCommand"/> to ensure the cloud file ID is provided and the uploaded file is not null or empty.
+    /// </summary>
     public EditFileCommandValidator()
     {
         RuleFor(x => x.CloudFileId)

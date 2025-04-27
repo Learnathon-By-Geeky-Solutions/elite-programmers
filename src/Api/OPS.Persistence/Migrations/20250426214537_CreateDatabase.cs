@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -10,7 +10,9 @@ namespace OPS.Persistence.Migrations
     /// <inheritdoc />
     public partial class CreateDatabase : Migration
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Applies the initial migration to create all schemas, tables, relationships, seed data, and indexes required for the examination platform database.
+        /// </summary>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(

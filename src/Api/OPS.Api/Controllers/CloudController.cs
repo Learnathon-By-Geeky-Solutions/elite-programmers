@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OPS.Api.Common;
@@ -21,7 +21,12 @@ public class CloudController(IMediator mediator) : BaseApiController
     /// <summary>Uploads a file to Google Cloud.</summary>
     /// <param name="file">File to upload (Max file size: 100 KB).</param>
     /// <param name="cancellationToken">Request cancellation token.</param>
-    /// <returns>Uploaded file information.</returns>
+    /// <summary>
+    /// Handles uploading a file to Google Cloud storage.
+    /// </summary>
+    /// <param name="file">The file to upload (maximum size 100 KB).</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>Information about the uploaded file.</returns>
     [AllowAnonymous]
     [HttpPost("Upload")]
     [Consumes("multipart/form-data")]
@@ -38,7 +43,12 @@ public class CloudController(IMediator mediator) : BaseApiController
     /// <summary>Gets file details from Google Cloud.</summary>
     /// <param name="cloudFileId">Cloud File ID.</param>
     /// <param name="cancellationToken">Request cancellation token.</param>
-    /// <returns>File details.</returns>
+    /// <summary>
+    /// Retrieves details for a cloud file by its unique identifier.
+    /// </summary>
+    /// <param name="cloudFileId">The GUID of the cloud file to retrieve.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The file details if found; otherwise, a not found response.</returns>
     [AllowAnonymous]
     [HttpGet("Details/{cloudFileId:guid}")]
     [ProducesResponseType<CloudFileResponse>(Status200OK)]
@@ -54,7 +64,13 @@ public class CloudController(IMediator mediator) : BaseApiController
     /// <param name="cloudFileId">Cloud File ID.</param>
     /// <param name="file">File to edit.</param>
     /// <param name="cancellationToken">Request cancellation token.</param>
-    /// <returns>Edited file information.</returns>
+    /// <summary>
+    /// Updates an existing file in Google Cloud storage with a new file.
+    /// </summary>
+    /// <param name="cloudFileId">The unique identifier of the file to edit.</param>
+    /// <param name="file">The new file to replace the existing content.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The updated file information if successful; otherwise, an appropriate error response.</returns>
     [Authorize]
     [HttpPut("Edit/{cloudFileId}")]
     [Consumes("multipart/form-data")]
@@ -73,7 +89,12 @@ public class CloudController(IMediator mediator) : BaseApiController
     /// <summary>Downloads a file from Google Cloud.</summary>
     /// <param name="fileId">File ID.</param>
     /// <param name="cancellationToken">Request cancellation token.</param>
-    /// <returns>File download information.</returns>
+    /// <summary>
+    /// Downloads a file from cloud storage by its identifier.
+    /// </summary>
+    /// <param name="fileId">The unique identifier of the file to download.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>The file content as a downloadable response, or a not found result if the file does not exist.</returns>
     [AllowAnonymous]
     [HttpGet("Download/{fileId}")]
     [ProducesResponseType<GoogleFileDownload>(Status200OK)]
@@ -95,7 +116,12 @@ public class CloudController(IMediator mediator) : BaseApiController
     /// <summary>Deletes a file from Google Cloud.</summary>
     /// <param name="cloudFileId">Cloud File ID.</param>
     /// <param name="cancellationToken">Request cancellation token.</param>
-    /// <returns>Deletion result.</returns>
+    /// <summary>
+    /// Deletes a cloud file identified by its GUID.
+    /// </summary>
+    /// <param name="cloudFileId">The unique identifier of the cloud file to delete.</param>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>An HTTP result indicating success, unauthorized access, or not found.</returns>
     [Authorize]
     [HttpDelete("Delete/{cloudFileId}")]
     [ProducesResponseType(Status200OK)]

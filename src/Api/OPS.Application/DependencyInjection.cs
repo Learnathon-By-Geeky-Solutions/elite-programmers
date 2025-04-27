@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using OPS.Application.CrossCutting.BackgroundServices;
@@ -11,6 +11,11 @@ namespace OPS.Application;
 [ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Registers core application services, MediatR handlers, validation behaviors, and background services into the dependency injection container.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddMediatR(config =>
