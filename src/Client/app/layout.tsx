@@ -1,21 +1,24 @@
-'use client'
+"use client";
 
-import { Providers } from '@/app/providers'
-import { Inter } from 'next/font/google'
-import { Toaster } from 'react-hot-toast'
-const inter = Inter({ subsets: ['latin'] })
+import { Providers } from "@/app/providers";
+import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+const inter = Inter({ subsets: ["latin"] });
 
 interface PageProps {
-  readonly children: React.ReactNode
+    readonly children: React.ReactNode;
 }
 
 export default function RootLayout({ children }: PageProps) {
-  return (
-    <html className={inter.className} lang="en" suppressHydrationWarning>
-      <body className="bg-[#eeeef0] dark:bg-[#000000]">
-        <Providers>{children}</Providers>
-        <Toaster position="top-right" reverseOrder={false} />
-      </body>
-    </html>
-  )
+    return (
+        <html className={inter.className} lang="en" suppressHydrationWarning>
+            <body
+                className="bg-[#eeeef0] dark:bg-[#000000]"
+                suppressHydrationWarning
+            >
+                <Providers>{children}</Providers>
+                <Toaster position="bottom-right" />
+            </body>
+        </html>
+    );
 }

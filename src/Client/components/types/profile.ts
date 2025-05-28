@@ -2,7 +2,10 @@ export interface ProfileLink {
   name: string
   link: string
 }
-
+export interface ProfileDetailsProps {
+  readonly formData?: ProfileFormData;
+  readonly setFormData?: React.Dispatch<React.SetStateAction<ProfileFormData>>;
+}
 export interface UserProfile {
   profileId: string
   firstName: string

@@ -79,44 +79,35 @@ export default function ExamList() {
                         paginatedExams.map(({ exam, result }) => (
                             <Card
                                 key={exam.examId}
-                                className="relative w-full mb-3 p-2 shadow-none bg-white dark:bg-[#18181b]"
-                            >
+                                className="relative w-full mb-3 p-2 shadow-none bg-white dark:bg-[#18181b]">
                                 <CardHeader>
                                     <div className="flex w-full justify-between items-center">
                                         <h1 className="text-2xl font-bold w-full">
                                             {exam.title}
                                             <span
                                                 className={`ml-2 text-sm ${getStatusColor(
-                                                    exam.status
-                                                )}`}
-                                            >
+                                                    exam.status)}`}>
                                                 {exam.status}
                                             </span>
                                         </h1>
-
                                         {exam.status === "Running" &&
                                             !result?.submittedAt && (
                                                 <Button
                                                     color="primary"
                                                     className="ml-96"
                                                     onPress={() =>
-                                                        handleAttend(exam)
-                                                    }
-                                                >
+                                                        handleAttend(exam)}>
                                                     Attend
-                                                </Button>
-                                            )}
+                                                </Button>)}
                                     </div>
                                 </CardHeader>
-
                                 <CardBody className="px-3">
                                     {exam.status === "Ended" ? (
                                         <div className="text-center">
                                             <div className="flex justify-between">
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        
-                                                        Date :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Date:
                                                     </span>
                                                     {new Date(
                                                         exam.opensAt
@@ -131,24 +122,24 @@ export default function ExamList() {
                                                     )}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Start Time :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Start Time:
                                                     </span>
                                                     {convertUtcToLocalTime(
                                                         exam.opensAt
                                                     )}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        End Time :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        End Time:
                                                     </span>
                                                     {convertUtcToLocalTime(
                                                         exam.closesAt
                                                     )}
                                                 </p>
-                                                <p className='text-black dark:text-white'>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Score :
+                                                <p>
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                      Score:
                                                     </span>
                                                     {exam.totalPoints}
                                                 </p>
@@ -164,9 +155,8 @@ export default function ExamList() {
                                         <div className="flex">
                                             <div className="flex flex-col flex-1">
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        
-                                                        Date :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Date:
                                                     </span>
                                                     {new Date(
                                                         exam.opensAt
@@ -181,8 +171,8 @@ export default function ExamList() {
                                                     )}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Duration :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Duration:
                                                     </span>
                                                     {formatTimeHourMinutes(
                                                         exam.durationMinutes
@@ -190,17 +180,17 @@ export default function ExamList() {
                                                     hr
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
                                                         
-                                                        Starts at :
+                                                        Starts at:
                                                     </span>
                                                     {convertUtcToLocalTime(
                                                         exam.opensAt
                                                     )}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Closes at :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Closes at:
                                                     </span>
                                                     {convertUtcToLocalTime(
                                                         exam.closesAt
@@ -210,28 +200,28 @@ export default function ExamList() {
 
                                             <div className="flex flex-col flex-1">
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
                                                         Problem Solving:
                                                     </span>
                                                     {exam.problemSolvingPoints}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Written :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Written:
                                                     </span>
                                                     {exam.writtenPoints}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        MCQ :
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        MCQ:
                                                     </span>
                                                     {exam.mcqPoints}
                                                 </p>
                                                 <p>
-                                                    <span className="text-[#71717a] dark:text-white">
-                                                        Score :
-                                                        {exam.totalPoints}
+                                                    <span className="text-[#71717a] dark:text-white mr-1">
+                                                        Score:
                                                     </span>
+                                                        {exam.totalPoints}
                                                 </p>
                                             </div>
                                         </div>

@@ -65,9 +65,7 @@ export default function Component() {
                     <div className="flex items-center">
                         <p className=" font-semibold">Joined : </p>
                         <p className="text-sm ml-3">
-                            {userSetting
-                                ? FormatDatewithTime(userSetting?.createdAt)
-                                : ""}
+                            {userSetting ? FormatDatewithTime(userSetting?.createdAt) : ""}
                         </p>
                     </div>
                 </div>

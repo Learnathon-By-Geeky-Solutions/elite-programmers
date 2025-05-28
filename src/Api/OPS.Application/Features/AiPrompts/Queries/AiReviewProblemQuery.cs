@@ -28,7 +28,7 @@ public class AiReviewProblemQueryHandler(IUnitOfWork unitOfWork, IAiService aiSe
             $$"""
               - Review solution of the given problem. Focus on accuracy and correctness.
               - Provide 2/3 lines review and give a score between score 0 to {{submission.Question.Points}}.
-              - Return JSON { "review" : "string", "score": "integer" }
+              - Return JSON { review, score }
               """,
             [
                 $"Question: [{submission.Question.StatementMarkdown}]",

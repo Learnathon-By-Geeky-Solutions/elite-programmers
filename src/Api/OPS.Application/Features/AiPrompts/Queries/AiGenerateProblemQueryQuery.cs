@@ -28,16 +28,42 @@ public class AiGenerateProblemQueryHandler(IAiService aiService)
         var prompt = new PromptRequest(
             """
             Create a problem-solving question. Test cases input-output must be like Codeforces.
+            Format the problem statement in Markdown format.
 
             Include:
-            - A short problem statement in Markdown format (like LeetCode).
-            - If there is a math equation use KaTex.
-            - Max 1 or 2 examples.
-            - Constraints.
+            - Max 2 or 3 examples.
             - 3-5 test cases.
 
+            * If there is a math equation use KaTex.
+            + If user ask for diagram, use mermaid.js syntax.
             * If a user prompt is given, use it as a base and turn it into a proper problem-solving question.
             * If it already has a problem statement, improve it.
+
+            Here is a template for the problem statement:
+
+            ## [Problem Title Here]
+
+            [Problem statement here]
+
+            ### Examples
+
+            **Example 1:**
+
+            [Input]
+            [Output]
+            [Explanation]
+
+            **Example 2:**
+
+            [Input]
+            [Output]
+            [Explanation]
+
+            * Input output format must be like codeforces.
+            * Input output must not be null or empty.
+
+            ### Constraints
+            [Constraints here with bullets]
 
             Return JSON:
             {
@@ -63,7 +89,6 @@ public class AiGenerateProblemQueryValidator : AbstractValidator<AiGenerateProbl
 {
     public AiGenerateProblemQueryValidator()
     {
-        RuleFor(x => x.UserPrompt)
-            .MaximumLength(2000);
+        RuleFor(x => x.UserPrompt);
     }
 }

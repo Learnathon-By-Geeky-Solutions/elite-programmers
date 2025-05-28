@@ -69,10 +69,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const userData = await fetchUser();
             if (userData) {
                 setUser(userData);
-            } else {
-                removeAuthToken();
-                setUser(null);
-                router.push(ROUTES.SIGN_IN);
             }
         } catch {
             removeAuthToken();
@@ -103,7 +99,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     api.defaults.headers.common[
                         "Authorization"
                     ] = `Bearer ${token}`;
-
                     const userData = await fetchUser();
                     if (userData) {
                         setUser(userData);

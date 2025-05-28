@@ -66,7 +66,12 @@ internal class GeminiService(IGeminiClient geminiClient, IOptions<GeminiSettings
 
             if (!string.IsNullOrEmpty(reviewText))
             {
-                var cleanJson = new Regex(@"```json\n|\n```").Replace(reviewText, string.Empty);
+                // Remove the enclosing Markdown JSON code block markers (```json and ```)
+                var cleanJson = Regex.Replace(reviewText, @"```json\n|\n```", string.Empty);
+
+                // Escape inline LaTeX-style math expressions ($...$) by wrapping them with
+                // backticks and doubling the dollar signs
+                cleanJson = Regex.Replace(cleanJson, @"\$(.*?)\$", match => $"`$${match.Groups[1].Value}$$`");
 
                 return typeof(T) == typeof(string)
                     ? (T)(object)cleanJson

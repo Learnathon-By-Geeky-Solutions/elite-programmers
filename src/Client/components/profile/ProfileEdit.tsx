@@ -4,14 +4,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Avatar, Input, Textarea } from '@heroui/react';
 import { Icon } from '@iconify/react';
 import api from '@/lib/api';
-import { ProfileFormData } from '@/components/types/profile';
+import { ProfileDetailsProps, ProfileFormData } from '@/components/types/profile';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthProvider'
 
-interface ProfileDetailsProps {
-  readonly formData?: ProfileFormData;
-  readonly setFormData?: React.Dispatch<React.SetStateAction<ProfileFormData>>;
-}
+
 
 export default function ProfileEdit({ formData, setFormData }: ProfileDetailsProps) {
   const [localFormData, setLocalFormData] = useState<ProfileFormData>({
@@ -105,9 +102,8 @@ export default function ProfileEdit({ formData, setFormData }: ProfileDetailsPro
         setProfileImage(tempUrl);
         fetchImageUrl(cloudFileId); 
         toast.success('Image uploaded successfully');
-      } catch (error) {
-        toast.error('Failed to upload image');
-        console.error('Upload error:', error);
+      } catch {
+        toast.error('Failed to upload image.Please check your network connection and try again.');
       } finally {
         setUploading(false);
       }

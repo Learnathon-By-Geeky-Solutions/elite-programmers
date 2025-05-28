@@ -1,6 +1,5 @@
 'use client'
 
-
 export interface TestCase {
   testCaseId?: string;
   input: string;
@@ -8,8 +7,6 @@ export interface TestCase {
   receivedOutput?: string;
   status?: 'success' | 'error' | 'pending';
 }
-
-
 export interface ProblemQuestion {
   questionId: string;
   examId: string;
@@ -19,10 +16,6 @@ export interface ProblemQuestion {
   difficultyType: string;
   testCases: TestCase[];
 }
-
-
-
-
 interface WrittenQuestion {
     questionId: string;
     examId: string;

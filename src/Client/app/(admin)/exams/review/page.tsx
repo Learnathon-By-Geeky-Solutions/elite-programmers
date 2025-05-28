@@ -1,30 +1,57 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, Button, Textarea, Select, SelectItem } from "@heroui/react";
+import {
+    Card,
+    Button,
+    Textarea,
+    Select,
+    SelectItem,
+    Input,
+} from "@heroui/react";
 import api from "@/lib/api";
 import { useSearchParams } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
-import { AiApiResponse, CandidateData, CandidatesResponse, CandidateSubmission, ExamResponse, ProblemSubmission, WrittenSubmission } from '@/components/types/review'
-import { ExamData } from '@/components/types/exam'
+import {
+    AiApiResponse,
+    CandidateData,
+    CandidatesResponse,
+    CandidateSubmission,
+    ExamResponse,
+    ProblemSubmission,
+    WrittenSubmission,
+} from "@/components/types/review";
+import { ExamData } from "@/components/types/exam";
+import { Icon } from "@iconify/react/dist/iconify.js";
+import MarkdownPreview from "@uiw/react-markdown-preview";
+import rehypeSanitize from "rehype-sanitize";
+import { Code } from "@/components/KatexMermaid";
+import useTheme from '@/hooks/useTheme'
 
 export default function Component() {
     const [problemPoints, setProblemPoints] = useState<number | undefined>();
     const [writtenPoints, setWrittenPoints] = useState<number | undefined>();
     const [mcqPoints, setMcqPoints] = useState<number | undefined>();
-    const [aiReviewResponse,setAiReviewResponse]=useState<AiApiResponse[]>([])
+    const [loadingSubmissionId, setLoadingSubmissionId] = useState<
+        string | null
+    >(null);
+    const [aiReviewResponse, setAiReviewResponse] = useState<
+        Record<string, AiApiResponse>
+    >({});
     const [mcqScore, setMcqScore] = useState(0);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [questionsData, setQuestionsData] = useState<Record<string, any>>({});
     const [totalPoints, setTotalPoints] = useState<number | undefined>();
     const [candidateList, setCandidateList] = useState<CandidateData[]>([]);
-    const [editedSubmission, setEditedSubmission] = useState<CandidateSubmission | null>(null);
+    const [editedSubmission, setEditedSubmission] =
+        useState<CandidateSubmission | null>(null);
     const searchParams = useSearchParams();
     const examId = searchParams.get("examId");
     const candidateId = searchParams.get("candidateId");
-    const [selectedCandidateId, setSelectedCandidateId] = useState<string>(candidateId||"");
-    const [exam,setExam]=useState<ExamData>()
+    const [selectedCandidateId, setSelectedCandidateId] = useState<string>(
+        candidateId || ""
+    );
+    const [exam, setExam] = useState<ExamData>();
     useEffect(() => {
         const fetchExamData = async () => {
             if (!examId) return;
@@ -46,7 +73,7 @@ export default function Component() {
                             questionType: "written",
                         };
                     });
-                    setExam(exam)
+                    setExam(exam);
                     setQuestionsData(newQuestionsData);
                     setProblemPoints(exam.problemSolvingPoints);
                     setWrittenPoints(exam.writtenPoints);
@@ -59,50 +86,72 @@ export default function Component() {
         };
         fetchExamData();
     }, [examId]);
-    const handleAiResponse = async (submissionId: string) => {
+    const handleAiResponse = async (
+        submissionId: string,
+        questionId: string
+    ) => {
+        setLoadingSubmissionId(submissionId);
         try {
-            const response = await api.post<{ review: string; score: number }>(
+            const response = await api.post<AiApiResponse>(
                 `/Ai/Review/ProblemSubmission/${submissionId}`
             );
             if (response.status === 200) {
-                setAiReviewResponse(prev => [...prev, response.data]);
-            } else {
-                toast.error("Failed to get AI review.");
+                setAiReviewResponse((prev) => ({
+                    ...prev,
+                    [questionId]: response.data,
+                }));
             }
-        } catch  {
+        } catch {
             toast.error("Error communicating with AI service.");
+        } finally {
+            setLoadingSubmissionId(null);
         }
     };
-    const handleAiWrittenResponse = async (submissionId: string) => {
+
+    const handleAiWrittenResponse = async (
+        submissionId: string,
+        questionId: string
+    ) => {
+        setLoadingSubmissionId(submissionId);
         try {
-            const response = await api.post<{ review: string; score: number }>(
+            const response = await api.post<AiApiResponse>(
                 `/Ai/Review/WrittenSubmission/${submissionId}`
             );
             if (response.status === 200) {
-                setAiReviewResponse(prev => [...prev, response.data]);
-            } else {
-                toast.error("Failed to get AI review.");
+                setAiReviewResponse((prev) => ({
+                    ...prev,
+                    [questionId]: response.data,
+                }));
             }
-        } catch  {
+        } catch {
             toast.error("Error communicating with AI service.");
+        } finally {
+            setLoadingSubmissionId(null);
         }
     };
     useEffect(() => {
         const fetchCandidateData = async () => {
             try {
-                const response = await api.get<CandidatesResponse>(`/Review/Candidates/${examId}`);
+                const response = await api.get<CandidatesResponse>(
+                    `/Review/Candidates/${examId}`
+                );
                 if (response.status === 200) {
                     setCandidateList(response.data.candidates);
                     if (response.data.candidates.length > 0) {
                         const candidateExists = response.data.candidates.some(
-                            (c) => c.account.accountId === selectedCandidateId );
+                            (c) => c.account.accountId === selectedCandidateId
+                        );
                         if (!candidateExists) {
-                            setSelectedCandidateId(response.data.candidates[0].account.accountId);
+                            setSelectedCandidateId(
+                                response.data.candidates[0].account.accountId
+                            );
                         }
-                    } }
+                    }
+                }
             } catch (error) {
                 console.error("Error fetching candidate data:", error);
-            }};
+            }
+        };
         if (examId) fetchCandidateData();
     }, [examId, selectedCandidateId]);
 
@@ -110,20 +159,26 @@ export default function Component() {
         const fetchSubmissionData = async () => {
             try {
                 if (!selectedCandidateId || !examId) return;
-                const response = await api.get(`/Review/Candidates/${examId}/${selectedCandidateId}`);
+                const response = await api.get(
+                    `/Review/Candidates/${examId}/${selectedCandidateId}`
+                );
                 if (response.status === 200) {
                     const submissionData = response.data;
                     const processedData = {
-                        problem: submissionData.submission.problem.map((p: ProblemSubmission) => ({
-                            ...p,
-                            isFlagged: p.isFlagged || false,
-                            flagReason: p.flagReason || null,
-                        })),
-                        written: submissionData.submission.written.map((w: WrittenSubmission) => ({
-                            ...w,
-                            isFlagged: w.isFlagged || false,
-                            flagReason: w.flagReason || null,
-                        })),
+                        problem: submissionData.submission.problem.map(
+                            (p: ProblemSubmission) => ({
+                                ...p,
+                                isFlagged: p.isFlagged || false,
+                                flagReason: p.flagReason || null,
+                            })
+                        ),
+                        written: submissionData.submission.written.map(
+                            (w: WrittenSubmission) => ({
+                                ...w,
+                                isFlagged: w.isFlagged || false,
+                                flagReason: w.flagReason || null,
+                            })
+                        ),
                     };
                     setEditedSubmission(processedData);
                 }
@@ -133,10 +188,9 @@ export default function Component() {
         };
         fetchSubmissionData();
     }, [examId, selectedCandidateId]);
-
     const handleCandidateChange = (value: string) => {
         setSelectedCandidateId(value);
-        setMcqScore(0)
+        setMcqScore(0);
     };
     const handlePrevCandidate = () => {
         const currentIndex = candidateList.findIndex(
@@ -147,7 +201,7 @@ export default function Component() {
                 candidateList[currentIndex - 1].account.accountId
             );
         }
-        setMcqScore(0)
+        setMcqScore(0);
     };
     const handleNextCandidate = () => {
         const currentIndex = candidateList.findIndex(
@@ -158,80 +212,114 @@ export default function Component() {
                 candidateList[currentIndex + 1].account.accountId
             );
         }
-        setMcqScore(0)
+        setMcqScore(0);
     };
-const updateProblemSubmission = (
-    questionId: string,
-    updates: Partial<ProblemSubmission>
-  ) => {
-    setEditedSubmission((prev) => {
-      if (!prev) return null;
-      
-      const updatedProblem = prev.problem.map(p => 
-        p.questionId === questionId ? {...p, ...updates} : p
-      );
-      const newProblemScore = updatedProblem.reduce((sum, p) => sum + p.score, 0);
-      setCandidateList(prevCandidates => prevCandidates.map(candidate => {
-        if (candidate.account.accountId === selectedCandidateId) {
-          return {
-            ...candidate,
-            result: {
-              ...candidate.result,
-              problemSolvingScore: newProblemScore,
-              totalScore: newProblemScore + 
-                         candidate.result.writtenScore + mcqScore 
+    const updateProblemSubmission = (
+        questionId: string,
+        updates: Partial<ProblemSubmission>
+    ) => {
+        setEditedSubmission((prev) => {
+            if (!prev) return null;
+
+            const updatedProblem = prev.problem.map((p) =>
+                p.questionId === questionId ? { ...p, ...updates } : p
+            );
+            const newProblemScore = updatedProblem.reduce(
+                (sum, p) => sum + p.score,
+                0
+            );
+            setCandidateList((prevCandidates) =>
+                prevCandidates.map((candidate) => {
+                    if (candidate.account.accountId === selectedCandidateId) {
+                        return {
+                            ...candidate,
+                            result: {
+                                ...candidate.result,
+                                problemSolvingScore: newProblemScore,
+                                totalScore:
+                                    newProblemScore +
+                                    candidate.result.writtenScore +
+                                    mcqScore,
+                            },
+                        };
+                    }
+                    return candidate;
+                })
+            );
+
+            return { ...prev, problem: updatedProblem };
+        });
+    };
+    const [aiScores, setAiScores] = useState<Record<string, number>>({});
+
+    const handleScoreUpdate = (questionId: string, score: number) => {
+        setAiScores((prev) => ({
+            ...prev,
+            [questionId]: score,
+        }));
+    };
+
+    const ReviewWithAi = ({
+        questionId,
+        onScoreUpdate,
+    }: {
+        questionId: string;
+        onScoreUpdate: (score: number) => void;
+    }) => {
+        const response = aiReviewResponse[questionId];
+        useEffect(() => {
+            if (response && typeof response.score === "number") {
+                onScoreUpdate(response.score);
             }
-          };
-        }
-        return candidate;
-      }));
-  
-      return {...prev, problem: updatedProblem};
-    });
-  };
-  const ReviewWithAi=()=>{
-    return(
-        <>
-        {aiReviewResponse.length > 0 && (<>
-                      <div className="mt-2 p-3 rounded-md bg-gray-100 dark:bg-gray-800">
-                        <p className="text-sm italic text-gray-600 dark:text-gray-400">AI Review:</p>
-                        <p className='w-full'>{aiReviewResponse.find(res => res.review)?.review || 'No review available'}</p>
-                      </div>
-                      <p className='w-full'>AI Score: {aiReviewResponse.find(res => res.score)?.score??0}</p>
-                      </>
-                    )}
-        </>
-    )
-  }
-  const updateWrittenSubmission = (
-    questionId: string,
-    updates: Partial<WrittenSubmission>
-  ) => {
-    setEditedSubmission((prev) => {
-      if (!prev) return null;
-  
-      const updatedWritten = prev.written.map(w => 
-        w.questionId === questionId ? {...w, ...updates} : w
-      );
-      const newWrittenScore = updatedWritten.reduce((sum, w) => sum + w.score, 0)
-      setCandidateList(prevCandidates => prevCandidates.map(candidate => {
-        if (candidate.account.accountId === selectedCandidateId) {
-          return {
-            ...candidate,
-            result: {
-              ...candidate.result,
-              writtenScore: newWrittenScore,
-              totalScore: candidate.result.problemSolvingScore + 
-                         newWrittenScore + mcqScore
-            }
-          };
-        }
-        return candidate;
-      }));
-  
-      return {...prev, written: updatedWritten};
-    });
-  };
+        }, [response, onScoreUpdate]);
+        return response ? (
+            <div className="mt-2 p-3 rounded-md bg-[#eeeef0] dark:bg-[#27272a]">
+                <p className="text-gray-600 dark:text-gray-400">
+                    <b> AI Review:</b>
+                </p>
+                <p className="w-full pb-2">
+                    {response.review || "No review available"}
+                </p>
+            </div>
+        ) : null;
+    };
+    const Mode=useTheme();
+    const updateWrittenSubmission = (
+        questionId: string,
+        updates: Partial<WrittenSubmission>
+    ) => {
+        setEditedSubmission((prev) => {
+            if (!prev) return null;
+
+            const updatedWritten = prev.written.map((w) =>
+                w.questionId === questionId ? { ...w, ...updates } : w
+            );
+            const newWrittenScore = updatedWritten.reduce(
+                (sum, w) => sum + w.score,
+                0
+            );
+            setCandidateList((prevCandidates) =>
+                prevCandidates.map((candidate) => {
+                    if (candidate.account.accountId === selectedCandidateId) {
+                        return {
+                            ...candidate,
+                            result: {
+                                ...candidate.result,
+                                writtenScore: newWrittenScore,
+                                totalScore:
+                                    candidate.result.problemSolvingScore +
+                                    newWrittenScore +
+                                    mcqScore,
+                            },
+                        };
+                    }
+                    return candidate;
+                })
+            );
+
+            return { ...prev, written: updatedWritten };
+        });
+    };
     const handleSaveAll = async () => {
         if (!editedSubmission || !examId || !selectedCandidateId) return;
         try {
@@ -259,7 +347,12 @@ const updateProblemSubmission = (
             const result = await api.get(
                 `/Review/Candidates/${examId}/${selectedCandidateId}`
             );
-            setMcqScore(result.data.submission.mcq.reduce((total:number, e:{score: number}) => total + e.score, 0));
+            setMcqScore(
+                result.data.submission.mcq.reduce(
+                    (total: number, e: { score: number }) => total + e.score,
+                    0
+                )
+            );
             setEditedSubmission({
                 problem: result.data.submission.problem,
                 written: result.data.submission.written,
@@ -273,11 +366,9 @@ const updateProblemSubmission = (
         (c) => c.account.accountId === selectedCandidateId
     );
     return (
-        <div className="mx-44 flex flex-col justify-between">
-            <h2 className="text-2xl font-bold text-center my-5">
-                Review
-            </h2>
-            <div className="w-full px-12 -none flex flex-col gap-4">
+        <div className="h-full mx-44 flex flex-col justify-between">
+            <h2 className="text-2xl font-bold text-center my-5">Review</h2>
+            <div className="w-full px-12 -none flex flex-col gap-4 min-h-[90vh]">
                 <Card className="space-y-4 p-5 bg-white dark:bg-[#18181b] shadow-none -none">
                     <h1 className="text-xl font-semibold w-full text-center">
                         Exam: {exam?.title}
@@ -307,16 +398,31 @@ const updateProblemSubmission = (
                                 </Select>
                             </div>
                             <div className="flex gap-2">
-                                <Button size="sm"
-                                    isDisabled={candidateList.findIndex((c) => c.account.accountId ===selectedCandidateId) <= 0}
-                                    onPress={handlePrevCandidate} >
+                                <Button
+                                    size="sm"
+                                    isDisabled={
+                                        candidateList.findIndex(
+                                            (c) =>
+                                                c.account.accountId ===
+                                                selectedCandidateId
+                                        ) <= 0
+                                    }
+                                    onPress={handlePrevCandidate}
+                                >
                                     Previous
                                 </Button>
                                 <Button
                                     size="sm"
-                                    isDisabled={candidateList.findIndex((c) => c.account.accountId === selectedCandidateId) >=candidateList.length - 1
+                                    isDisabled={
+                                        candidateList.findIndex(
+                                            (c) =>
+                                                c.account.accountId ===
+                                                selectedCandidateId
+                                        ) >=
+                                        candidateList.length - 1
                                     }
-                                    onPress={handleNextCandidate}>
+                                    onPress={handleNextCandidate}
+                                >
                                     Next
                                 </Button>
                             </div>
@@ -324,34 +430,53 @@ const updateProblemSubmission = (
                         {selectedCandidate && (
                             <div>
                                 <div className="flex items-center justify-between">
-                                <div>
-                                    <span className="text-default-500">Score:</span>
-                                        {selectedCandidate.result?.totalScore??0}/{totalPoints}
+                                    <div>
+                                        <span className="text-default-500">
+                                            Score:
+                                        </span>
+                                        {" "}{selectedCandidate.result?.totalScore ??
+                                            0}
+                                        /{totalPoints}
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">
+                                            Submitted At:
+                                        </span>
+                                        {" "}{new Date(
+                                            selectedCandidate.result
+                                                ?.submittedAt 
+                                        ).toLocaleString()}
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="text-default-500">Submitted At:</span>
-                                    {new Date(selectedCandidate.result?.submittedAt??"").toLocaleString()}
+                                <div className="flex w-full justify-between">
+                                    <div>
+                                        <span className="text-default-500">
+                                            Problem Solving:
+                                        </span>
+                                        {" "}{selectedCandidate.result
+                                            ?.problemSolvingScore ?? 0}
+                                        /{problemPoints}
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">
+                                            Written Question:
+                                        </span>
+                                        {" "}{selectedCandidate.result
+                                            ?.writtenScore ?? 0}
+                                        /{writtenPoints}
+                                    </div>
+                                    <div>
+                                        <span className="text-default-500">
+                                            MCQ:
+                                        </span>
+                                        {" "}{mcqScore ?? 0}/{mcqPoints}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className='flex w-full justify-between'>
-                                 <div>
-                                    <span className="text-default-500">Problem Solving:</span>
-                                        {selectedCandidate.result?.problemSolvingScore??0}/{problemPoints}
-                                </div>
-                                 <div>
-                                    <span className="text-default-500">Written Question:</span>
-                                        {selectedCandidate.result?.writtenScore??0}/{writtenPoints}
-                                </div>
-                                 <div>
-                                    <span className="text-default-500">MCQ:</span>
-                                        {mcqScore??0}/{mcqPoints}
-                                </div>
-                            </div>
                             </div>
                         )}
                     </div>
                 </Card>
-                {selectedCandidateId && editedSubmission && (
+                {selectedCandidateId && editedSubmission ? (
                     <div className=" p-5 rounded-xl">
                         <h2 className="w-full text-center">
                             {selectedCandidate?.account.username ??
@@ -364,66 +489,147 @@ const updateProblemSubmission = (
                                     Problem Solving Submissions
                                 </h2>
                                 {editedSubmission.problem.map((submission) => (
-                                    <div key={submission.questionId}
-                                        className="space-y-4 mb-6 p-4 bg-white dark:bg-[#18181b]  rounded-lg">
-                                        <h3 className="font-medium "> Problem Statement :</h3>
+                                    <div
+                                        key={submission.questionId}
+                                        className="space-y-4 mb-6 p-8 bg-white dark:bg-[#18181b]  rounded-lg"
+                                    >
                                         <div className="font-medium">
                                             {questionsData[
                                                 submission.questionId
                                             ] ? (
-                                                <ReactMarkdown>
-                                                { questionsData[submission.questionId].statementMarkdown}
-                                                </ReactMarkdown>
-                                            ) : ("Loading question...")}
+                                                <div className="bg-white dark:bg-[#18181b] rounded-lg">
+                                                    <MarkdownPreview
+                                                    source={
+                                                        questionsData[
+                                                            submission
+                                                                .questionId
+                                                        ].statementMarkdown
+                                                    }
+                                                    rehypePlugins={[rehypeSanitize]}
+                                                    components={{ code: Code }}
+                                                    style={{
+                                                        backgroundColor: Mode==="dark" ? '#18181b' : 'white',
+                                                        color:Mode==="dark" ? 'white' : 'black'
+                                                      }}
+                                                />
+                                                </div>
+                                            ) : (
+                                                "Loading question..."
+                                            )}
                                         </div>
                                         <div>
-                                            <h4 className="font-semibold mb-2"> Code Submission: </h4>
+                                            <h4 className="font-semibold mb-2">
+                                                Code Submission:
+                                            </h4>
                                             <Card className="p-4 rounded-lg bg-[#eeeef0] dark:bg-[#27272a] shadow-none">
                                                 <div className="font-mono text-sm whitespace-pre-wrap p-2">
                                                     {submission.code}
                                                 </div>
                                             </Card>
                                         </div>
-                                        <ReviewWithAi/>
-                                        <div className='w-full flex justify-end'>
-                                        <Button onPress={()=>handleAiResponse( submission.questionId)}
-      className=" gap-2 py-2 px-3 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 text-white font-semibold shadow-md hover:opacity-90 transition">
-          Review With AI
-    </Button></div>
-                                        <div>
-                                            <h4 className="font-semibold mb-2"> Result</h4>
-                                            <div className="flex items-center gap-5">
-                                                <div className="flex items-center gap-3">
-                                                    <span>Points</span>
-                                                    <input
+                                        <ReviewWithAi
+                                            questionId={submission.questionId}
+                                            onScoreUpdate={(score) =>
+                                                handleScoreUpdate(
+                                                    submission.questionId,
+                                                    score
+                                                )
+                                            }
+                                        />
+                                        <div className="w-full flex justify-between items-center">
+                                            <div>
+                                                <h4 className="font-semibold mb-2">
+                                                    Result
+                                                </h4>
+                                                <div className="flex items-center gap-5">
+                                                    <Input
+                                                        className="rounded-2xl w-48"
+                                                        isRequired
+                                                        label={`Points (Max ${
+                                                            questionsData[
+                                                                submission
+                                                                    .questionId
+                                                            ].points
+                                                        })`}
                                                         type="number"
-                                                        className="w-12"
-                                                        value={submission.score}
-                                                        onChange={(e) =>
-                                                            updateProblemSubmission(
-                                                                submission.questionId,
-                                                                { score: parseInt( e.target.value )} ) }
-                                                    /> /{questionsData[submission.questionId].points}
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    variant="flat"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={
-                                                            submission.isFlagged
-                                                        }
+                                                        min="0"
+                                                        value={(
+                                                            aiScores[
+                                                                submission
+                                                                    .questionId
+                                                            ] ??
+                                                            submission.score ??
+                                                            0
+                                                        ).toString()}
                                                         onChange={(e) =>
                                                             updateProblemSubmission(
                                                                 submission.questionId,
                                                                 {
-                                                                    isFlagged:e.target.checked,
+                                                                    score: parseInt(
+                                                                        e.target
+                                                                            .value
+                                                                    ),
                                                                 }
                                                             )
                                                         }
                                                     />
-                                                    Flag Solution
+                                                    <Button
+                                                        size="sm"
+                                                        variant="flat"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={
+                                                                submission.isFlagged
+                                                            }
+                                                            onChange={(e) =>
+                                                                updateProblemSubmission(
+                                                                    submission.questionId,
+                                                                    {
+                                                                        isFlagged:
+                                                                            e
+                                                                                .target
+                                                                                .checked,
+                                                                    }
+                                                                )
+                                                            }
+                                                        />
+                                                        Flag Solution
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Button
+                                                    color="primary"
+                                                    variant="solid"
+                                                    size="md"
+                                                    onPress={() =>
+                                                        handleAiResponse(
+                                                            submission.problemSubmissionId,
+                                                            submission.questionId
+                                                        )
+                                                    }
+                                                    isLoading={
+                                                        loadingSubmissionId ===
+                                                        submission.problemSubmissionId
+                                                    }
+                                                    startContent={
+                                                        !(
+                                                            loadingSubmissionId ===
+                                                            submission.problemSubmissionId
+                                                        ) && (
+                                                            <Icon
+                                                                icon="lucide:sparkles"
+                                                                className="text-lg"
+                                                            />
+                                                        )
+                                                    }
+                                                    className="min-w-[160px] font-medium"
+                                                >
+                                                    {loadingSubmissionId ===
+                                                    submission.problemSubmissionId
+                                                        ? "Reviewing..."
+                                                        : "Review With AI"}
                                                 </Button>
                                             </div>
                                         </div>
@@ -431,11 +637,20 @@ const updateProblemSubmission = (
                                             <Textarea
                                                 className="bg-[#eeeef0] dark:bg-[#27272a] rounded-xl"
                                                 placeholder="Flag reason"
-                                                value={submission.flagReason || ""}
+                                                value={
+                                                    submission.flagReason || ""
+                                                }
                                                 onChange={(e) =>
                                                     updateProblemSubmission(
-                                                        submission.questionId,{flagReason:e.target.value})
-                                                }/>)}
+                                                        submission.questionId,
+                                                        {
+                                                            flagReason:
+                                                                e.target.value,
+                                                        }
+                                                    )
+                                                }
+                                            />
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -446,75 +661,151 @@ const updateProblemSubmission = (
                                     Written Submissions
                                 </h2>
                                 {editedSubmission.written.map((submission) => (
-                                    <div key={submission.questionId}
-                                        className="space-y-4 p-4 flex flex-col gap-3 mb-6 bg-white dark:bg-[#18181b] rounded-lg">
-                                        <div  className="space-y-4  p-4  rounded-lg">
+                                    <div
+                                        key={submission.questionId}
+                                        className="space-y-4 p-4 flex flex-col gap-3 mb-6 bg-white dark:bg-[#18181b] rounded-lg"
+                                    >
+                                        <div className="space-y-4  p-4  rounded-lg">
                                             <div className="font-medium">
-                                                {questionsData[submission.questionId] ? (
-                                                    <ReactMarkdown>{questionsData[submission.questionId].statementMarkdown}</ReactMarkdown>
-                                                ) : (
-                                                    'Loading question...'
-                                                )}
+                                                {questionsData[
+                                                    submission.questionId
+                                                ]?.statementMarkdown ??
+                                                    "Loading question..."}
                                             </div>
-                                            <div className='mb-4'>
+                                            <div className="mb-4">
                                                 <Card className="p-4 rounded-lg bg-[#eeeef0] dark:bg-[#27272a] shadow-none mb-4">
                                                     <div className="whitespace-pre-wrap p-2">
-                                                    {submission.answer}
-                                                </div>
-                                            </Card>
-                                            <ReviewWithAi/>
-                                            <div className='w-full flex justify-end'>
-                                            <Button onPress={()=>handleAiWrittenResponse(submission.questionId)}
-      className=" gap-2 py-2 px-3 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 text-white font-semibold shadow-md hover:opacity-90 transition">
-          Review With AI
-    </Button>
-    </div>
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold mb-2">Result</h4>
-                                            <div className="flex items-center gap-5">
-                                                <div className="flex items-center gap-3">
-                                                    <span>Points</span>
-                                                    <input
-                                                        type="number"
-                                                        className="w-12"
-                                                        value={submission.score}
-                                                        onChange={(e) =>
-                                                            updateWrittenSubmission(
-                                                                submission.questionId,
-                                                                {score: parseInt(e.target.value)})
-                                                        }/>/{questionsData[submission.questionId].score}
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    variant="flat">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={
-                                                            submission.isFlagged
-                                                        }
-                                                        onChange={(e) =>
-                                                            updateWrittenSubmission(
-                                                                submission.questionId,
-                                                                {isFlagged:e.target.checked})}
-                                                    />
-                                                    Flag Solution
-                                                </Button>
+                                                        {submission.answer}
+                                                    </div>
+                                                </Card>
+                                                <ReviewWithAi
+                                            questionId={submission.questionId}
+                                            onScoreUpdate={(score) =>
+                                                handleScoreUpdate(
+                                                    submission.questionId,
+                                                    score
+                                                )
+                                            }
+                                        />
                                             </div>
+                                            <div className="w-full flex justify-between items-center">
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">
+                                                        Result
+                                                    </h4>
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <Input
+                                                                className="rounded-2xl w-48"
+                                                                isRequired
+                                                                label={`Points (Max ${
+                                                                    questionsData[
+                                                                        submission
+                                                                            .questionId
+                                                                    ]?.score ??
+                                                                    0
+                                                                })`}
+                                                                type="number"
+                                                                min="0"
+                                                                value={(
+                                                                    aiScores[
+                                                                        submission
+                                                                            .questionId
+                                                                    ] ??
+                                                                    submission.score ??
+                                                                    0
+                                                                ).toString()}
+                                                                onChange={(e) =>
+                                                                    updateWrittenSubmission(
+                                                                        submission.questionId,
+                                                                        {
+                                                                            score: parseInt(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            ),
+                                                                        } ) } />
+                                                        </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={
+                                                                    submission.isFlagged
+                                                                }
+                                                                onChange={(e) =>
+                                                                    updateWrittenSubmission(
+                                                                        submission.questionId,
+                                                                        {
+                                                                            isFlagged:
+                                                                                e
+                                                                                    .target
+                                                                                    .checked,
+                                                                        }
+                                                                    )
+                                                                }
+                                                            />
+                                                            Flag Solution
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Button
+                                                        color="primary"
+                                                        size="md"
+                                                        variant="solid"
+                                                        onPress={() =>
+                                                            handleAiWrittenResponse(
+                                                                submission.writtenSubmissionId,
+                                                                submission.questionId
+                                                            )
+                                                        }
+                                                        isLoading={
+                                                            loadingSubmissionId ===
+                                                            submission.writtenSubmissionId
+                                                        }
+                                                        startContent={
+                                                            !(
+                                                                loadingSubmissionId ===
+                                                                submission.writtenSubmissionId
+                                                            ) && (
+                                                                <Icon
+                                                                    icon="lucide:sparkles"
+                                                                    className="text-lg"
+                                                                />
+                                                            )
+                                                        }
+                                                        className="min-w-[160px] font-medium"
+                                                    >
+                                                        {loadingSubmissionId ===
+                                                        submission.writtenSubmissionId
+                                                            ? "Reviewing..."
+                                                            : "Review With AI"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            {submission.isFlagged && (
+                                                <Textarea
+                                                    className="bg-[#eeeef0] dark:bg-[#27272a] rounded-xl"
+                                                    placeholder="Flag reason"
+                                                    value={
+                                                        submission.flagReason ||
+                                                        ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateWrittenSubmission(
+                                                            submission.questionId,
+                                                            {
+                                                                flagReason:
+                                                                    e.target
+                                                                        .value,
+                                                            }
+                                                        )
+                                                    }
+                                                />
+                                            )}
                                         </div>
-                                        {submission.isFlagged && (
-                                            <Textarea
-                                                className="bg-[#eeeef0] dark:bg-[#27272a] rounded-xl"
-                                                placeholder="Flag reason"
-                                                value={submission.flagReason || ""}
-                                                onChange={(e) =>
-                                                    updateWrittenSubmission(
-                                                        submission.questionId,{flagReason:e.target.value,}
-                                                    )
-                                                }
-                                            />
-                                        )}
-                                    </div>
                                     </div>
                                 ))}
                             </div>
@@ -529,6 +820,12 @@ const updateProblemSubmission = (
                             </Button>
                         </div>
                     </div>
+                ) : (
+                    <Card className="h-[70vh]">
+                        <p className="h-[70vh] flex justify-center items-center">
+                            No Submission Found
+                        </p>
+                    </Card>
                 )}
             </div>
         </div>

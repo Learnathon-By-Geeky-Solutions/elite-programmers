@@ -3,14 +3,13 @@
 import { setAuthToken } from "@/lib/auth";
 import ROUTES from "@/constants/route";
 import { useAuth } from "@/context/AuthProvider";
-import { Button, Divider, Link, useDisclosure } from "@heroui/react";
+import { Button, Link, useDisclosure } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import React, { useState, useCallback } from "react";
 import { FieldValues, Path, useForm } from "react-hook-form";
 import { ZodType } from "zod";
 import api from "@/lib/api";
-import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import OTPModal from "@/components/ui/Modal/OtpVerification";
@@ -276,7 +275,7 @@ const AuthForm = <T extends FieldValues>({
                     />
                 )}
                 <Button
-                    className="w-full text-white"
+                    className="w-full text-white my-5"
                     color="primary"
                     type="submit"
                     isDisabled={loading}
@@ -284,35 +283,6 @@ const AuthForm = <T extends FieldValues>({
                     {!loading ? buttonText : "Processing..."}
                 </Button>
             </form>
-
-            <div className="flex items-center gap-4 py-2">
-                <Divider className="flex-1" />
-                <p className="shrink-0 text-tiny text-default-500">OR</p>
-                <Divider className="flex-1" />
-            </div>
-
-            <div className="flex flex-col gap-2">
-                <Button
-                    className="w-full"
-                    startContent={<Icon icon="flat-color-icons:google" />}
-                    variant="bordered"
-                >
-                    Continue with Google
-                </Button>
-                <Button
-                    className="w-full"
-                    startContent={
-                        <Icon
-                            className="text-default-500"
-                            icon="fe:github"
-                            width={24}
-                        />
-                    }
-                    variant="bordered"
-                >
-                    Continue with Github
-                </Button>
-            </div>
 
             {formType === "SIGN_IN" ? (
                 <p className="w-full flex gap-2 text-center text-sm items-center justify-center">

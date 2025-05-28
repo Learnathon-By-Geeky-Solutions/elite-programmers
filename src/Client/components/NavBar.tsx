@@ -26,11 +26,12 @@ export default function Component() {
     return (
         <div>
             <LoadingModal isOpen={loading} message="Loading..."/> 
-            <Navbar  classNames={{  wrapper: "w-full justify-end bg-[#eeeef0] dark:bg-[#000000]",
-                    item: "hidden md:flex",  }} >
+            <Navbar  classNames={{  wrapper: " bg-[#eeeef0] dark:bg-[#000000]",
+                    item: "hidden md:flex", }} >
                 <NavbarContent
                     className="h-11 gap-1 rounded-full bg-[#ffffff] px-4 dark:bg-[#18181b]"
-                    justify="end">
+                    // justify="end"
+                    >
                     <NavbarItem>
                         <ThemeSwitch />
                     </NavbarItem>
@@ -38,7 +39,7 @@ export default function Component() {
                         <button type="button" className='p-4'>
                             <Dropdown placement="bottom-end">
                                 <DropdownTrigger>
-                                    <div className="mt-1 h-8 w-8 outline-none transition-transform">
+                                    <div className="mt-1  outline-none transition-transform">
                                         <Badge
                                             className="border-transparent"
                                             color="success"
@@ -55,7 +56,7 @@ export default function Component() {
                                     </div>
                                 </DropdownTrigger>
                                 <DropdownMenu
-                                    aria-label="Profile Actions"
+                                    aria-label="Profile Actions" 
                                     variant="flat" >
                                     <DropdownItem
                                         key="user" textValue="User Profile"

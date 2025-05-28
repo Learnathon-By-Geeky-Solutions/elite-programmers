@@ -20,7 +20,6 @@ import { FormatDatewithTime } from "@/components/DateTimeFormat";
 import isValidEmail from "@/components/EmailValidation";
 import toast from "react-hot-toast";
 import Paginate from "@/components/SelectPagination";
-import { AxiosError } from "axios";
 import { ApiResponse, User } from "@/components/types/apiResponse";
 
 const columns = [
@@ -54,16 +53,12 @@ export default function Component() {
                             user.roles.length === 1 &&
                             user.roles[0] === "Candidate"
                     );
-
                     setAllUsers(pureCandidates);
                     setTotalPages(
                         Math.ceil(pureCandidates.length / rowsPerPage)
                     );
                 }
-            } catch (err) {
-                const axiosError = err as AxiosError;
-                toast.error(axiosError.message);
-            }
+            } catch { toast.error("Failed to load candidate list.Please check your network connection and try again.") }
         };
         ManageUser();
     }, [page, rowsPerPage, searchTerm]);
@@ -192,34 +187,29 @@ export default function Component() {
 
     const topContent = useMemo(
         () => (
-            <div className="flex gap-3 p-3 w-full flex-col items-center mt-5">
-                <div className="flex w-full justify-between ">
-                    <p>User List</p>
-                    <Input
-                        isClearable
-                        className="w-[400px] bg-[#eeeef0] dark:[#71717a] rounded-2xl"
-                        placeholder="Search"
-                        startContent={<SearchIcon />}
-                        value={searchTerm}
-                        onClear={onClear}
-                        onValueChange={onSearchChange}
-                    />
-                </div>
-                <div className="w-full flex justify-end">
-                    <Paginate
-                        rowsPerPage={rowsPerPage}
-                        setRowsPerPage={setRowsPerPage}
-                    />
-                </div>
+            <div className="flex w-full justify-between mt-24">
+                <Input
+                    isClearable
+                    className="w-[400px] dark:[#71717a] rounded-2xl "
+                    placeholder="Search"
+                    startContent={<SearchIcon />}
+                    value={searchTerm}
+                    onClear={onClear}
+                    onValueChange={onSearchChange}
+                />
+                <Paginate
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                />
             </div>
         ),
         [onClear, onSearchChange, rowsPerPage, searchTerm]
     );
 
     return (
-        <div className=" flex flex-col justify-between">
+        <div className="flex flex-col justify-between">
             <h2 className="text-2xl font-bold text-center my-5">Add Admins</h2>
-            <div className="h-full mx-44 flex flex-col justify-between rounded-xl bg-white dark:bg-[#18181b] px-12">
+            <div className=" mx-44 flex flex-col justify-between rounded-xl bg-white dark:bg-[#18181b] px-12">
                 <div>
                     <div className="flex gap-3 w-full p-3 mt-12 items-center">
                         <Textarea
@@ -247,7 +237,7 @@ export default function Component() {
                         selectionMode="multiple"
                         classNames={{
                             table: "w-full h-full",
-                            base: "min-h-[550px]",
+                            base: "min-h-[570px]",
                         }}
                         onSelectionChange={setSelectedKeys}
                     >

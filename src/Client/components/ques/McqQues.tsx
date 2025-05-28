@@ -14,13 +14,14 @@ import PaginationButtons from "@/components/ui/PaginationButton";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
-import { MCQFormProps, MCQQuestion } from '../types/mcqQues'
+import { MCQFormProps, McqQuestion, MCQQuestion } from "../types/mcqQues";
 
-export default function App({
+export default function Component({
     examId,
     existingQuestions,
-    onSaved,
     mcqPoints,
+    onFocus,
+    onBlur
 }: MCQFormProps) {
     const [questions, setQuestions] = useState<MCQQuestion[]>(
         existingQuestions.length > 0
@@ -116,7 +117,6 @@ export default function App({
         newQuestions[questionIndex].options[optionIndex].text = value;
         setQuestions(newQuestions);
     };
-
     const handleCorrectOptionChange = (
         questionIndex: number,
         optionId: number
@@ -133,7 +133,6 @@ export default function App({
 
         setQuestions(newQuestions);
     };
-
     const addNewQuestion = () => {
         setQuestions([
             ...questions,
@@ -159,9 +158,25 @@ export default function App({
         setQuestions(newQuestions);
     };
     const handleSubmit = async () => {
+        const invalidOptionIndex = questions.findIndex(q => {
+            const option1 = q.options.find(opt => opt.id === 1)?.text.trim();
+            const option2 = q.options.find(opt => opt.id === 2)?.text.trim();
+            return !option1 || !option2;
+        });
+        if (invalidOptionIndex !== -1) {
+            toast.error(`Option 1 and 2 are required in question ${invalidOptionIndex + 1}`);
+            return;
+        }
         const hasMissingPoints = questions.some((problem) => !problem.points);
+        const hasMissingCorrectAns = questions.some(q => q.correctOptions.length === 0);
+        const index = questions.findIndex(q=>!q.points)
+        const indexans = questions.findIndex(q=>q.correctOptions.length===0)
         if (hasMissingPoints) {
-            toast.error("Please input points of the mcq question");
+            toast.error(`Please input points of the mcq question ${index+1}`);
+            return;
+        }
+        if (hasMissingCorrectAns) {
+            toast.error(`Please select correct options of the mcq question ${indexans+1}`);
             return;
         }
         try {
@@ -190,11 +205,9 @@ export default function App({
                         prev.map((q) => {
                             if (!q.questionId) {
                                 const newQ = createResponse.data.find(
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    (newQuestion: any) =>
-                                        newQuestion.statementMarkdown ===
-                                            q.question &&
-                                        newQuestion.points === q.points
+                                    (newQuestion: McqQuestion) =>
+                                        newQuestion.statementMarkdown === q.question &&
+                                        newQuestion.score === q.points
                                 );
                                 return newQ
                                     ? { ...q, questionId: newQ.questionId }
@@ -205,9 +218,9 @@ export default function App({
                     );
                 }
             }
-            const updatePromises = existingQuestions.map((q) => {
+            existingQuestions.map(async(q) => {
                 if (!q.questionId) return;
-                return api.patch("/Questions/Mcq/Update", {
+                const createResponse=await api.patch("/Questions/Mcq/Update", {
                     questionId: q.questionId,
                     statementMarkdown: q.question,
                     points: q.points,
@@ -221,11 +234,11 @@ export default function App({
                         answerOptions: q.correctOptions.join(","),
                     },
                 });
+                if(createResponse.status===200)
+                toast.success("MCQ questions saved successfully!");
+               else if(createResponse.status===409) toast.error("Exam of this question is already published"); 
+                setSaveButton(!saveButton);
             });
-            await Promise.all(updatePromises);
-            toast.success("MCQ questions saved successfully!");
-            onSaved();
-            setSaveButton(!saveButton);
         } catch (error) {
             const err = error as AxiosError;
             toast.error(err.message ?? "Failed to save questions");
@@ -242,12 +255,12 @@ export default function App({
                         >
                             <CardHeader className="flex flex-col gap-2 ">
                                 <h2 className="text-2xl my-3">
-                                    MCQ Question : {currentPage + 1}
+                                    MCQ Question: {currentPage + 1}
                                 </h2>
                             </CardHeader>
-                            <CardBody className="flex flex-col gap-4 p-8">
+                            <CardBody className="flex flex-col gap-4 px-8 pt-4">
                                 <Textarea
-                                    label="mcq question"
+                                    label="Mcq question"
                                     minRows={5}
                                     value={questions[currentPage].question}
                                     className="bg-[#eeeef0] dark:[#71717a] rounded-2xl"
@@ -286,15 +299,8 @@ export default function App({
                                                     className="bg-[#eeeef0] dark:[#71717a] rounded-2xl flex-grow"
                                                     label={`Option ${option.id}`}
                                                     value={option.text}
-                                                    isRequired={
-                                                        option.id === 1 ||
-                                                        option.id === 2
-                                                    }
-                                                    onChange={(e: {
-                                                        target: {
-                                                            value: string;
-                                                        };
-                                                    }) =>
+                                                    isRequired={option.id===1 || option.id===2}
+                                                    onChange={(e) =>
                                                         handleOptionChange(
                                                             currentPage,
                                                             option.id,
@@ -306,8 +312,9 @@ export default function App({
                                         )
                                     )}
                                 </div>
+                                <hr className="my-3 border-t border-gray-100 dark:border-gray-500" />
                             </CardBody>
-                            <div className="w-full flex justify-between px-8 py-5">
+                            <div className="w-full flex justify-between px-8 pb-5">
                                 <Input
                                     className="w-32"
                                     type="number"
@@ -323,12 +330,13 @@ export default function App({
                                             e.target.value
                                         )
                                     }
+                                    onFocus={onFocus}
+                                     onBlur={onBlur}
                                     min="0"
                                 />
                                 <div className="flex gap-3 ">
                                     <span>
-                                        {" "}
-                                        Page {currentPage + 1} of{" "}
+                                        Page {currentPage + 1} of
                                         {questions.length}
                                     </span>
                                     <PaginationButtons
@@ -356,7 +364,7 @@ export default function App({
                                     }
                                     className="mb-4"
                                 >
-                                    Delete{" "}
+                                    Delete
                                 </Button>
                             </div>
                         </Card>

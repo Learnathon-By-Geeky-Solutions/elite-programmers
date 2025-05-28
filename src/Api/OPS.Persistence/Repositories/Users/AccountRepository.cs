@@ -4,6 +4,7 @@ using OPS.Domain.Entities.User;
 using OPS.Domain.Enums;
 using OPS.Domain.Interfaces.Users;
 using OPS.Persistence.Repositories.Common;
+using static OPS.Domain.Enums.RoleType;
 
 namespace OPS.Persistence.Repositories.Users;
 
@@ -64,10 +65,14 @@ internal class AccountRepository(AppDbContext dbContext) : Repository<Account>(d
             query = query.Where(a => a.Username.Contains(trimmedSearch) || a.Email.Contains(trimmedSearch));
         }
 
-        if (role.HasValue)
+        query = role switch
         {
-            query = query.Where(a => a.AccountRoles.Any(ar => ar.RoleId == (int)role.Value));
-        }
+            Candidate => query.Where(
+                a => a.AccountRoles.Count == 1 &&
+                     a.AccountRoles.Any(ar => ar.RoleId == (int)Candidate)),
+            Admin => query.Where(a => a.AccountRoles.Any(ar => ar.RoleId == (int)Admin)),
+            _ => query
+        };
 
         query = query.OrderBy(a => a.CreatedAt);
 
@@ -103,7 +108,7 @@ internal class AccountRepository(AppDbContext dbContext) : Repository<Account>(d
     public async Task<List<Account>> GetNonAdminAccounts(List<Guid> accountIds, CancellationToken cancellationToken)
     {
         return await _dbContext.Accounts
-            .Where(a => accountIds.Contains(a.Id) && a.AccountRoles.All(ar => ar.RoleId != (int)RoleType.Admin))
+            .Where(a => accountIds.Contains(a.Id) && a.AccountRoles.All(ar => ar.RoleId != (int)Admin))
             .ToListAsync(cancellationToken);
     }
 }

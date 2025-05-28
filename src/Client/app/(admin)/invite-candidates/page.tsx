@@ -20,12 +20,10 @@ import {
     Button,
     SelectItem,
     Textarea,
-    Tooltip,
     Select,
     Spinner,
 } from "@heroui/react";
 import SearchIcon from "@/components/ui/SearchIcon";
-import { Icon } from "@iconify/react/dist/iconify.js";
 import CommonModal from "@/components/ui/Modal/EditDeleteModal";
 import PaginationButtons from "@/components/ui/PaginationButton";
 import api from "@/lib/api";
@@ -51,7 +49,6 @@ export default function Component() {
     const [fileContent, setFileContent] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [exams, setExams] = useState<Exam[]>([]);
-    const [copiedEmail, setCopiedEmail] = useState("");
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedEmail, setSelectedEmail] = useState<User | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -75,15 +72,7 @@ export default function Component() {
             }
         };
         fetchExams();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const handleCopyEmail = useCallback((email: string) => {
-        navigator.clipboard.writeText(email).then(() => {
-            setCopiedEmail(email);
-            setTimeout(() => setCopiedEmail(""), 2000);
-        });
-    }, []);
-
     const handleAddToList = () => {
         if (!fileContent) {
             toast.error("Please enter emails or upload a file");
@@ -91,7 +80,6 @@ export default function Component() {
         }
         parseEmailContent(fileContent);
     };
-
     const filteredItems = useMemo(() => {
         if (!filterValue) return userEmails;
         return userEmails.filter((user) =>
@@ -127,7 +115,6 @@ export default function Component() {
             toast.error("No candidates to invite");
             return;
         }
-
         try {
             setIsLoading(true);
             const response = await api.post("/Exam/Invite/Candidates", {
@@ -141,7 +128,7 @@ export default function Component() {
                 setFileContent("");
             }
         } catch {
-            toast.error("Failed to send invitations");
+            toast.error("Failed to send invitations.Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -227,44 +214,10 @@ export default function Component() {
             return (
                 <div className="flex items-center gap-2">
                     <span>{user.email}</span>
-                    <Tooltip
-                        content={
-                            copiedEmail === user.email
-                                ? "Copied!"
-                                : "Copy email"
-                        }
-                    >
-                        <Button
-                            isIconOnly
-                            variant="light"
-                            size="sm"
-                            onPress={() => handleCopyEmail(user.email)}
-                        >
-                            <Icon
-                                icon={
-                                    copiedEmail === user.email
-                                        ? "lucide:check"
-                                        : "lucide:copy"
-                                }
-                                className={
-                                    copiedEmail === user.email
-                                        ? "text-success"
-                                        : ""
-                                }
-                                width={18}
-                            />
-                        </Button>
-                    </Tooltip>
                 </div>
             );
         },
-        [
-            copiedEmail,
-            editingEmail,
-            editedEmail,
-            handleEditEmail,
-            handleCopyEmail,
-        ]
+        [editingEmail, editedEmail, handleEditEmail]
     );
 
     const handleDeleteEmail = () => {

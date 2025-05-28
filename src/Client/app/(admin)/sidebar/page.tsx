@@ -62,7 +62,7 @@ const menuItems = [
     {
         key: "candidate",
         icon: <FaUserCheck size={30} />,
-        label: "Candidate View",
+        label: "Candidate Portal",
         path: "/home",
     }
 ];
@@ -121,7 +121,7 @@ const Sidebar = () => {
                         {menuItems.map((item) => (
                             <li
                                 key={item.key}
-                                className={`flex items-start gap-2 p-2 rounded-lg hover:bg-white/10 
+                                className={`flex items-start gap-2 p-2 rounded-lg hover:bg-white/10
               ${
                   pathname === item.path ? "bg-[#eeeef0] dark:bg-[#27272a]" : ""
               }`}

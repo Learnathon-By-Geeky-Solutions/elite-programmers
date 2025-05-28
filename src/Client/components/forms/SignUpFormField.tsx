@@ -1,3 +1,5 @@
+'use Client'
+
 import React, { useCallback } from 'react';
 import { Input, Checkbox, Link } from '@heroui/react';
 import { Icon } from '@iconify/react';
@@ -6,7 +8,7 @@ import { FieldValues, Path, UseFormRegister } from 'react-hook-form';
 interface SignUpFormFieldsProps<T extends FieldValues> {
   register: UseFormRegister<T>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  errors: any; 
+  errors: any;
   handleFieldBlur: (field: 'username' | 'email') => Promise<void>;
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -80,7 +82,7 @@ const SignUpFormFields = <T extends FieldValues>({
         {errors.confirmPassword && (
           <p className="text-sm text-red-500">{errors.confirmPassword.message as string}</p>
         )}
-        <Checkbox {...register('agreeTerms' as Path<T>)} className="py-4" size="sm">
+        <Checkbox {...register('agreeTerms' as Path<T>)} className="pt-4 pb-0" size="sm">
           I agree with the &nbsp;
           <Link href="#" size="sm">Terms</Link>&nbsp; and &nbsp;
           <Link href="#" size="sm">Privacy Policy</Link>

@@ -23,7 +23,7 @@ public class AiGenerateWrittenQuesQueryHandler(IAiService aiService)
             - Create a computer science theoretical question for interviews.
             - If a user prompt is provided, use it as a reference.
             - If the user prompt already includes a question, improve it.
-            - Use prompts like "Explain" or "Describe" only if the user prompt suggests a topic that needs a long, detailed answer.
+            - The question should be clear, concise, and ending with a question mark.
             - Return JSON: { "questionStatement": "string" }
             """,
             [

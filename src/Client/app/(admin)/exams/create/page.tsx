@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Card, Input, Textarea, TimeInput } from "@heroui/react";
 import { CalendarDate, Time } from "@internationalized/date";
 import { DatePicker } from "@heroui/date-picker";
@@ -12,9 +12,8 @@ import { v4 as uuidv4 } from "uuid";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AxiosError } from "axios";
 import { convertUtcToLocalTime, parseTime } from "@/components/DateTimeFormat";
-import { AiButton } from '@/components/ui/AiButton'
+import { AIGenerateButton } from "@/components/ui/AiButton";
 
 interface FormData {
     title: string;
@@ -34,10 +33,16 @@ export default function ExamFormPage() {
         { id: string; type: string }[]
     >([]);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedContent, setGeneratedContent] = React.useState<
+        string | null
+    >(null);
+    const [publishBtn, setPublishbtn] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const searchParams = useSearchParams();
     const route = useRouter();
     const [examId, setExamId] = useState(searchParams.get("id") || "");
     const isEdit = searchParams.get("isEdit") === "true";
+    const [published, setPublished] = useState<boolean>();
     const [formData, setFormData] = useState<FormData>({
         title: "",
         description: "",
@@ -46,40 +51,39 @@ export default function ExamFormPage() {
         opensAt: "",
         closesAt: "",
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [saveStatus, setSaveStatus] = useState({
-        exam: false,
-        problemSolve: false,
-        writtenQues: false,
-        mcq: false,
-    });
     const [questionData, setQuestionData] = useState({
         problemSolve: [],
         writtenQues: [],
         mcq: [],
     });
+    const [isTotalPointsFocused, setIsTotalPointsFocused] = useState(false);
+
     const calculatedTotal = problemQuesPoint + writtenQuesPoint + mcqQuesPoint;
-    const handleComponentSaved = (type: keyof typeof saveStatus) => {
-        setSaveStatus((prev) => ({ ...prev, [type]: true }));
-    };
-    const handleAiResponse=()=>{
-        const FetchData=async()=>{
-         setIsGenerating(true);
-        try{
-          const response=await api.post('/Ai/Generate/ExamDescription',{
-            title:formData.title,
-            userPrompt:formData.description
-          })
-          if(response.status===200){
-            setFormData({ ...formData, description: response.data.description });
-          }
-        }catch{}
-        finally {
-            setIsGenerating(false);
-          }
-        }
+    const handleGenerate = () => {
+        const FetchData = async () => {
+            setGeneratedContent(null);
+            setIsGenerating(true);
+            try {
+                const response = await api.post(
+                    "/Ai/Generate/ExamDescription",
+                    {
+                        title: formData.title,
+                        userPrompt: formData.description,
+                    }
+                );
+                if (response.status === 200) {
+                    setFormData({
+                        ...formData,
+                        description: response.data.description,
+                    });
+                }
+            } catch {
+            } finally {
+                setIsGenerating(false);
+            }
+        };
         FetchData();
-    }
+    };
     const handleAddComponent = (componentType: string) => {
         setActiveComponents([
             ...activeComponents,
@@ -88,8 +92,10 @@ export default function ExamFormPage() {
     };
     const handleSaveExam = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         if (!date) {
             toast.error("Please select a date");
+            setIsLoading(false);
             return;
         }
         try {
@@ -98,7 +104,8 @@ export default function ExamFormPage() {
                 selectedDate: CalendarDate | null
             ): string => {
                 if (!timeString || !selectedDate) return "";
-                const [hoursStr, minutesStr] = timeString.split(":");
+                const [timePart] = timeString.split(' ');
+                const [hoursStr, minutesStr] = timePart.split(":");
                 const hours = parseInt(hoursStr, 10);
                 const minutes = parseInt(minutesStr, 10);
                 const localDate = new Date(
@@ -124,8 +131,16 @@ export default function ExamFormPage() {
                 ).toISOString(),
             };
             setTotalPoints(examData.totalPoints);
+            const now = new Date().toISOString();
+            if (examData.opensAt <= now) {
+                toast.error("Exam's start time must be in the future");
+                setIsLoading(false);
+                return;
+            }
             if (examData.opensAt >= examData.closesAt) {
-                toast.error("please input correct start and end time");
+                toast.error("Close time must be after start time");
+                setIsLoading(false);
+                return;
             }
             let resp;
             if (examId) {
@@ -141,6 +156,10 @@ export default function ExamFormPage() {
                 resp = await api.patch(`/Exam/Update`, payload);
                 if (resp.status === 200) {
                     toast.success(`Exam updated successfully.`);
+                    setPublished(resp.data.isPublished);
+                    route.push("/view-exams");
+                }else if(resp.status === 409){
+                    toast.error(resp.data.detail||"Exam is already published");
                     route.push("/view-exams");
                 }
             } else {
@@ -148,11 +167,18 @@ export default function ExamFormPage() {
                 if (resp.status === 200) {
                     toast.success(`Exam created successfully.`);
                     setExamId(resp.data.examId);
+                    setPublished(resp.data.isPublished);
                 }
             }
-        } catch (err) {
-            const error = err as AxiosError;
-            toast.error(error?.message);
+            setPublishbtn(true);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            const { data } = error.response;
+            toast.error(
+                data.message || "An unexpected error occurred.Please try again."
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
     useEffect(() => {
@@ -201,7 +227,6 @@ export default function ExamFormPage() {
                     mcq: mcqQuesResponse.data ?? [],
                 });
                 const components: { id: string; type: string }[] = [];
-
                 if (problemQuesResponse.data?.length) {
                     components.push({ id: uuidv4(), type: "problemSolve" });
                 }
@@ -212,39 +237,82 @@ export default function ExamFormPage() {
                     components.push({ id: uuidv4(), type: "mcq" });
                 }
                 setActiveComponents(components);
-            } catch (error) {
-                console.error("Error fetching exam data:", error);
-                toast.error("Failed to load exam data");
+            } catch {
+                toast.error(
+                    "Failed to load exam data.Please check your network connection and try again."
+                );
                 route.push("/view-exams");
             }
         };
 
         fetchExamDetails();
     }, [examId, isEdit, route, totalPoints]);
+    const toastIdRef = useRef<string | null>(null);
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const showToastDebounced = useCallback(
+        (
+            calculatedTotal: number,
+            problemQuesPoint: number,
+            writtenQuesPoint: number,
+            mcqQuesPoint: number,
+            formTotal: number
+        ) => {
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+            debounceTimer.current = setTimeout(() => {
+                const message = `Current Points
+                                • Problem: ${problemQuesPoint}
+                                • Written: ${writtenQuesPoint}
+                                • MCQ: ${mcqQuesPoint}
+                                • Total: ${calculatedTotal} / ${formTotal}`;
+
+                if (toastIdRef.current) {
+                    toast(message, {
+                        id: toastIdRef.current,
+                        position: "bottom-right",
+                        className:
+                            "bg-white dark:bg-[#18181b] text-black dark:text-white",
+                        style: { whiteSpace: "pre-line" },
+                    });
+                } else {
+                    toastIdRef.current = toast(message, {
+                        position: "bottom-right",
+                        className:
+                            "bg-white dark:bg-[#18181b] text-black dark:text-white",
+                        style: { whiteSpace: "pre-line" },
+                    });
+                }
+            }, 400);
+        },
+        []
+    );
+
     useEffect(() => {
-        const debounceTimer = setTimeout(() => {
-            const calculatedTotal =
-                problemQuesPoint + writtenQuesPoint + mcqQuesPoint;
-            if (calculatedTotal !== formData.totalPoints) {
-                const message = `Points updated: 
-            Problem Solving: ${problemQuesPoint}
-            Written: ${writtenQuesPoint}
-            MCQ: ${mcqQuesPoint}
-            Total Calculated: ${calculatedTotal}
-            Exam Total Points: ${formData.totalPoints}`;
-                toast(message, {
-                    duration: 4000,
-                    position: "bottom-right",
-                    style: {
-                        whiteSpace: "pre-line",
-                    },
-                });
-            }
-        }, 1000);
-        return () => clearTimeout(debounceTimer);
-    }, [formData.totalPoints, mcqQuesPoint, problemQuesPoint, writtenQuesPoint]);
+        const calculatedTotal =
+            problemQuesPoint + writtenQuesPoint + mcqQuesPoint;
+        if (isTotalPointsFocused) {
+            showToastDebounced(
+                calculatedTotal,
+                problemQuesPoint,
+                writtenQuesPoint,
+                mcqQuesPoint,
+                formData.totalPoints
+            );
+        } else if (toastIdRef.current) {
+            toast.dismiss(toastIdRef.current);
+            toastIdRef.current = null;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        formData.totalPoints,
+        problemQuesPoint,
+        writtenQuesPoint,
+        mcqQuesPoint,
+        isTotalPointsFocused,
+    ]);
+
     const handlePublishExam = async () => {
-        if (examId) {
+        if (examId && !published) {
             try {
                 const response = await api.post(
                     `/Exam/Publish?examId=${examId}`
@@ -260,7 +328,7 @@ export default function ExamFormPage() {
                 );
             }
         } else {
-            toast.error("Please save the exam first.");
+            toast.error("Exam is already published.");
         }
     };
     const handleProblemPointsChange = (points: number) => {
@@ -311,12 +379,14 @@ export default function ExamFormPage() {
             mcq: [],
         });
     };
-    const handleOpenCloseTime = (time: Time | null): string => {
-        if (!time) return "";
-        return `${String(time.hour).padStart(2, "0")}:${String(
-            time.minute
-        ).padStart(2, "0")}`;
-    };
+  const handleOpenCloseTime = (time: Time | null): string => {
+    if (!time) return "";
+    const hours = time.hour;
+    const minutes = time.minute;
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const twelveHour = hours % 12 || 12; 
+    return `${twelveHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
     return (
         <>
             <div className="mx-44 flex flex-col gap-8">
@@ -326,7 +396,8 @@ export default function ExamFormPage() {
                 <Card className="flex shadow-none flex-col justify-between p-8 items-center">
                     <form
                         className="flex gap-4 flex-wrap flex-col w-full"
-                        onSubmit={handleSaveExam}>
+                        onSubmit={handleSaveExam}
+                    >
                         <Input
                             className="rounded-2xl"
                             isRequired
@@ -338,24 +409,38 @@ export default function ExamFormPage() {
                                 setFormData({
                                     ...formData,
                                     title: e.target.value,
-                                })}/>
-                        <div className='relative'>
-                       <div>
-                       <Textarea
-                            className="rounded-2xl"
-                            isRequired
-                            label="Description"
-                            name="description"
-                            value={formData.description}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    description: e.target.value,
                                 })
                             }
                         />
-                       </div>
-                        <div className='absolute top-2 right-2'><AiButton onPress={handleAiResponse} loading={isGenerating}/></div>
+                        <div className="relative">
+                            <div>
+                                <Textarea
+                                    className="rounded-2xl"
+                                    isRequired
+                                    label="Description"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            description: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div className="absolute bottom-2 right-2">
+                                <AIGenerateButton
+                                    isGenerating={isGenerating}
+                                    onGenerate={handleGenerate}
+                                />
+                                {generatedContent && (
+                                    <div className="p-4 mt-6 border rounded-lg bg-content2 border-default-200">
+                                        <p className="text-foreground">
+                                            {generatedContent}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="flex gap-5">
                             <DatePicker
@@ -411,25 +496,58 @@ export default function ExamFormPage() {
                                 hourCycle={12}
                             />
                         </div>
-                        <Input
-                            className="rounded-2xl"
-                            isRequired
-                            label="Total Points"
-                            type="number"
-                            min="1"
-                            value={formData.totalPoints.toString()}
-                            onChange={handleTotalPointsChange}
-                        />
-                        <div className="flex justify-end mt-2 gap-3">
-                            <Button color="success" onPress={handlePublishExam}>
-                                Publish
-                            </Button>
-                            <Button color="danger" onPress={handleDeleteExam}>
-                                Delete
-                            </Button>
-                            <Button color="primary" type="submit">
-                                {isEdit ? "Update" : "Save"}
-                            </Button>
+                        <div className="flex items-end justify-between">
+                            <div className="w-1/4">
+                                <Input
+                                    className="rounded-2xl"
+                                    isRequired
+                                    label="Total Points"
+                                    type="number"
+                                    min="1"
+                                    value={formData.totalPoints.toString()}
+                                    onFocus={() =>
+                                        setIsTotalPointsFocused(true)
+                                    }
+                                    onBlur={() => {
+                                        setIsTotalPointsFocused(false);
+                                        if (toastIdRef.current) {
+                                            toast.dismiss(toastIdRef.current);
+                                            toastIdRef.current = null;
+                                        }
+                                    }}
+                                    onChange={handleTotalPointsChange}
+                                />
+                            </div>
+                            <div className="flex gap-3">
+                                {publishBtn && (
+                                    <Button
+                                        color="success"
+                                        onPress={handlePublishExam}
+                                    >
+                                        Publish
+                                    </Button>
+                                )}
+                                {examId && (
+                                    <Button
+                                        color="danger"
+                                        onPress={handleDeleteExam}
+                                    >
+                                        Delete
+                                    </Button>
+                                )}
+                                {!publishBtn &&
+                                    (isLoading ? (
+                                        <Button color="primary" type="submit">
+                                            {isEdit
+                                                ? "Updating..."
+                                                : "Saving..."}
+                                        </Button>
+                                    ) : (
+                                        <Button color="primary" type="submit">
+                                            {isEdit ? "Update" : "Save"}
+                                        </Button>
+                                    ))}
+                            </div>
                         </div>
                     </form>
                 </Card>
@@ -439,28 +557,45 @@ export default function ExamFormPage() {
                             <ProblemSolve
                                 examId={examId}
                                 existingQuestions={questionData.problemSolve}
-                                onSaved={() =>
-                                    handleComponentSaved("problemSolve")
-                                }
                                 problemPoints={handleProblemPointsChange}
+                                onFocus={() => setIsTotalPointsFocused(true)}
+                                onBlur={() => {
+                                    setIsTotalPointsFocused(false);
+                                    if (toastIdRef.current) {
+                                        toast.dismiss(toastIdRef.current);
+                                        toastIdRef.current = null;
+                                    }
+                                }}
                             />
                         )}
                         {component.type === "writtenQues" && (
                             <WrittenQues
                                 examId={examId}
                                 existingQuestions={questionData.writtenQues}
-                                onSaved={() =>
-                                    handleComponentSaved("writtenQues")
-                                }
                                 writtenPoints={handleWrittenPointsChange}
+                                onFocus={() => setIsTotalPointsFocused(true)}
+                                onBlur={() => {
+                                    setIsTotalPointsFocused(false);
+                                    if (toastIdRef.current) {
+                                        toast.dismiss(toastIdRef.current);
+                                        toastIdRef.current = null;
+                                    }
+                                }}
                             />
                         )}
                         {component.type === "mcq" && (
                             <McqQues
                                 examId={examId}
                                 existingQuestions={questionData.mcq}
-                                onSaved={() => handleComponentSaved("mcq")}
                                 mcqPoints={handleMcqPointsChange}
+                                onFocus={() => setIsTotalPointsFocused(true)}
+                                onBlur={() => {
+                                    setIsTotalPointsFocused(false);
+                                    if (toastIdRef.current) {
+                                        toast.dismiss(toastIdRef.current);
+                                        toastIdRef.current = null;
+                                    }
+                                }}
                             />
                         )}
                     </div>

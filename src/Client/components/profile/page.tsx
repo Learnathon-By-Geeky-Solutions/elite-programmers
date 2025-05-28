@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { FormatDatewithTime } from "../DateTimeFormat";
 import { ProfileLink, User } from "../types/profile";
-import { useAuth } from '@/context/AuthProvider'
+import { useAuth } from "@/context/AuthProvider";
 
 export default function ProfilePage() {
     const path = usePathname();
@@ -14,7 +14,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const {profileImage}=useAuth()
+    const { profileImage } = useAuth();
     useEffect(() => {
         setRoute(path.startsWith("/profile") ? "profile" : "myprofile");
     }, [path]);
@@ -27,7 +27,8 @@ export default function ProfilePage() {
                 if (response.status === 200) {
                     const normalizedData = {
                         ...response.data,
-                        profile: response.data.profile ? {
+                        profile: response.data.profile
+                            ? {
                                   ...response.data.profile,
                                   profileList:
                                       response.data.profile.profileList?.map(
@@ -83,7 +84,7 @@ export default function ProfilePage() {
                     />
                     <div className="ml-64">
                         <h2 className="text-3xl font-semibold">
-                            {userInfo?.profile?.firstName ?? ""}{" "}
+                            {userInfo?.profile?.firstName ?? ""}
                             {userInfo?.profile?.lastName ?? ""}
                         </h2>
                         <p className="text-gray-400">

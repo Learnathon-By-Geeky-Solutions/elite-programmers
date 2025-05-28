@@ -27,8 +27,9 @@ export interface ExistingQuestion {
 export interface MCQFormProps {
     readonly examId: string;
     readonly existingQuestions: ExistingQuestion[];
-    readonly onSaved: () => void;
     readonly mcqPoints: (points: number) => void;
+    onFocus: () => void;
+    onBlur: () => void;
 }
 export interface MCQOptions {
     option1: string;
@@ -46,4 +47,5 @@ export interface McqQuestion {
     score: number;
     difficultyType: string;
     mcqOption: MCQOptions;
+    answerOptions: string;
 }

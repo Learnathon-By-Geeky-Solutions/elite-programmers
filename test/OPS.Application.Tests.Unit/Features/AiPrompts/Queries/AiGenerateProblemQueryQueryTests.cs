@@ -97,18 +97,4 @@ public class AiGenerateProblemQueryQueryTests
         // Assert
         result.IsValid.Should().BeTrue();
     }
-
-    [Fact]
-    public void Validate_WithInvalidInput_ShouldHaveErrors()
-    {
-        // Arrange
-        var query = new AiGenerateProblemQuery("a".PadRight(2001));
-
-        // Act
-        var result = _validator.Validate(query);
-
-        // Assert
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().HaveCount(1);
-    }
 }

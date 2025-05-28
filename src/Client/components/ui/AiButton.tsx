@@ -1,25 +1,37 @@
-import { Spinner,Button } from "@heroui/react";
+import React from "react";
+import { Button, Tooltip } from "@heroui/react";
+import { Icon } from "@iconify/react";
 
-export const AiButton = ({onPress, loading = false,}: { onPress: () => void; loading?: boolean;}) => {
+interface AIGenerateButtonProps {
+  isGenerating: boolean;
+  onGenerate: () => void;
+  size?: "sm" | "md" | "lg";
+  variant?: "solid" | "bordered" | "light" | "flat" | "faded" | "shadow" | "ghost";
+}
+
+export const AIGenerateButton: React.FC<AIGenerateButtonProps> = ({
+  isGenerating,
+  onGenerate,
+  size = "md",
+  variant = "solid"
+}) => {
   return (
-    <Button
-      onPress={onPress}
-      className="flex items-center gap-2 py-2 px-3 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 text-white font-semibold shadow-md hover:opacity-90 transition"
-      isDisabled={loading}
-    >
-      {loading ? (
-        <Spinner
-          classNames={{ label: "text-white text-sm" }}
-          variant="wave"
-        />
-      ) : (
-        <>
-          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 0l1.76 5.26L17 6.18l-4 3.89L14.52 16 10 12.98 5.48 16 7 10.07l-4-3.89 5.24-.92L10 0z" />
-          </svg>
-          Generate With AI
-        </>
-      )}
-    </Button>
+    <Tooltip content="Generate content using AI" placement="top">
+      <Button
+        color="primary"
+        variant={variant}
+        size={size}
+        onPress={onGenerate}
+        isLoading={isGenerating}
+        className="p-2 min-w-0 w-10 h-10 rounded-full"
+      >
+        {!isGenerating && (
+          <Icon
+            icon="lucide:sparkles"
+            className="text-lg"
+          />
+        )}
+      </Button>
+    </Tooltip>
   );
 };

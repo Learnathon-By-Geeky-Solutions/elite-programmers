@@ -67,8 +67,15 @@ export function calculateDuration(start: string, end: string): string {
 
   return `${hours}h ${minutes}m ${seconds}s`;
 }
-export function parseTime(time: string): Time | null {
-    if (!time) return null;
-    const [hour, minute] = time.split(":").map(Number);
-    return new Time(hour, minute);
+export function parseTime(timeString: string): Time | null {
+    if (!timeString) return null;
+    const [timePart, period] = timeString.split(' ');
+    const [hours, minutes] = timePart.split(':');
+    let hour = parseInt(hours, 10);
+    if (period === 'PM' && hour !== 12) {
+        hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+        hour = 0;
+    }
+    return new Time(hour, parseInt(minutes, 10));
 }

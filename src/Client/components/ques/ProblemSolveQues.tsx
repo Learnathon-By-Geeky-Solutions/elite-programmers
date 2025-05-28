@@ -1,15 +1,30 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { Form, Button, Textarea, Card, Input } from "@heroui/react";
+import {
+    Form,
+    Button,
+    Textarea,
+    Card,
+    Input,
+    Select,
+    SelectItem,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import PaginationButtons from "@/components/ui/PaginationButton";
-import MdEditor from "../KatexMermaid";
+import MdEditor from "@/components/KatexMermaid";
 import api from "@/lib/api";
 import { AxiosError } from "axios";
-import { AiButton } from '@/components/ui/AiButton'
-import { FormFooterProps, Problem, ProblemItemProps, ProblemSolvingFormProps, TestCaseItemProps } from '../types/problemQues'
+import { AIGenerateButton } from "@/components/ui/AiButton";
+import {
+    FormFooterProps,
+    Problem,
+    ProblemItemProps,
+    ProblemQuestion,
+    ProblemSolvingFormProps,
+    TestCaseItemProps,
+} from "../types/problemQues";
 
 const ProblemItem: React.FC<ProblemItemProps> = ({
     problem,
@@ -19,23 +34,16 @@ const ProblemItem: React.FC<ProblemItemProps> = ({
     onQuestionChange,
     onPointsChange,
     onDifficultyChange,
+    onFocus,
+    onBlur,
     onAddTestCase,
 }) => (
     <div className="rounded-lg w-full flex flex-col justify-center items-center gap-4">
-        <div className="w-full flex justify-end">
-            <select
-                className="rounded-md border p-2 dark:bg-[#1e293b] dark:text-gray-300"
-                value={problem.difficultyType}
-                onChange={(e) => onDifficultyChange(e.target.value)}
-            >
-                <option value="">Select difficulty</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-        </div>
         <div className=" w-full">
-            <MdEditor value={problem.question} onChange={onQuestionChange} />
+            <MdEditor
+                value={problem.question}
+                onChange={(value) => onQuestionChange(value || "")}
+            />
         </div>
         {problem.testCases.map((testCase, index) => (
             <TestCaseItem
@@ -50,14 +58,36 @@ const ProblemItem: React.FC<ProblemItemProps> = ({
             />
         ))}
         <div className="w-full flex justify-between">
-            <div>
+            <div className="flex gap-3">
                 <Input
                     className="w-32"
                     type="number"
                     label="Points"
                     value={problem.points.toString()}
                     onChange={(e) => onPointsChange(parseInt(e.target.value))}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
                 />
+                <div>
+                    <Select
+                        label="Difficulty"
+                        placeholder="Select difficulty"
+                        selectedKeys={
+                            problem.difficultyType
+                                ? [problem.difficultyType.toLowerCase()]
+                                : []
+                        }
+                        className="w-40"
+                        onChange={(e) => {
+                            const value = e.target.value.toLowerCase();
+                            onDifficultyChange(value);
+                        }}
+                    >
+                        <SelectItem key="easy">Easy</SelectItem>
+                        <SelectItem key="medium">Medium</SelectItem>
+                        <SelectItem key="hard">Hard</SelectItem>
+                    </Select>
+                </div>
             </div>
             <div>
                 <Button
@@ -135,8 +165,9 @@ const FormFooter: React.FC<FormFooterProps> = ({
 export default function ProblemSolvingForm({
     examId,
     existingQuestions,
-    onSaved,
     problemPoints,
+    onFocus,
+    onBlur,
 }: ProblemSolvingFormProps) {
     const [problems, setProblems] = useState<Problem[]>(
         existingQuestions.length > 0
@@ -158,34 +189,44 @@ export default function ProblemSolvingForm({
     );
     const [currentPage, setCurrentPage] = useState(0);
     const problemsPerPage = 1;
-        const [isGenerating, setIsGenerating] = useState(false);
-      const handleAiResponse=()=>{
-           const FetchData=async()=>{
-            setIsGenerating(true)
-           try{
-             const response=await api.post('/Ai/Generate/ProblemSolvingQuestion',{
-                userPrompt: problems[currentPage].question
-             })
-             if(response.status===200){
-                 console.log(response.data.statementMarkdown)
-                const newProblem = {
-                    question: response.data.statementMarkdown,
-                    testCases: response.data.testCases || [{ input: "", output: "" }],
-                    points: 0,
-                    difficultyType:  "Easy"
-                  };
-          
-                  setProblems((prev) =>
-                    prev.map((p, idx) => (idx === currentPage ? { ...p, ...newProblem } : p))
-                  );
-             }
-           }catch{}
-           finally{
-            setIsGenerating(false)
-           }
-         }
-           FetchData();
-       }
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedContent, setGeneratedContent] = React.useState<
+        string | null
+    >(null);
+    const handleGenerate = () => {
+        const FetchData = async () => {
+            setIsGenerating(true);
+            setGeneratedContent(null);
+            try {
+                const response = await api.post(
+                    "/Ai/Generate/ProblemSolvingQuestion",
+                    {
+                        userPrompt: problems[currentPage].question,
+                    }
+                );
+                if (response.status === 200) {
+                    const newProblem = {
+                        question: response.data.statementMarkdown,
+                        testCases: response.data.testCases || [
+                            { input: "", output: "" },
+                        ],
+                        points: 0,
+                        difficultyType: "Easy",
+                    };
+
+                    setProblems((prev) =>
+                        prev.map((p, idx) =>
+                            idx === currentPage ? { ...p, ...newProblem } : p
+                        )
+                    );
+                }
+            } catch {
+            } finally {
+                setIsGenerating(false);
+            }
+        };
+        FetchData();
+    };
     const handleDeleteProblem = async (problemIndex: number) => {
         const problemToDelete = problems[problemIndex];
         try {
@@ -227,21 +268,38 @@ export default function ProblemSolvingForm({
         );
         problemPoints(total);
     }, [problems, problemPoints]);
-
     const handleSaveProblem = async (e: React.FormEvent) => {
         e.preventDefault();
-        const hasMissingDifficulty = problems.some(
+        const indexMissingPoints = problems.findIndex(
+            (problem) => !problem.points
+        );
+        const indexMissingDifficulty = problems.findIndex(
             (problem) =>
                 !problem.difficultyType || problem.difficultyType.trim() === ""
         );
-        const hasMissingPoints = problems.some((problem) => !problem.points);
-
-        if (hasMissingDifficulty) {
-            toast.error("Please select a difficulty level");
+        const indexMissingTestCase = problems.findIndex(
+            (problem) => problem.testCases[0].input.length === 0
+        );
+        if (indexMissingDifficulty !== -1) {
+            toast.error(
+                `Please select difficulty level for Question ${
+                    indexMissingDifficulty + 1
+                }`
+            );
             return;
         }
-        if (hasMissingPoints) {
-            toast.error("Please input points of the problem");
+        if (indexMissingPoints !== -1) {
+            toast.error(
+                `Please input points for Question ${indexMissingPoints + 1}`
+            );
+            return;
+        }
+        if (indexMissingTestCase !== -1) {
+            toast.error(
+                `Please add at least one test case for Question ${
+                    indexMissingTestCase + 1
+                }`
+            );
             return;
         }
         try {
@@ -266,8 +324,7 @@ export default function ProblemSolvingForm({
                         prev.map((p) => {
                             if (!p.questionId) {
                                 const newProblem = createResponse.data.find(
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    (np: any) =>
+                                    (np: ProblemQuestion) =>
                                         np.statementMarkdown === p.question &&
                                         np.points === p.points
                                 );
@@ -281,6 +338,8 @@ export default function ProblemSolvingForm({
                             return p;
                         })
                     );
+                } else if (createResponse.status === 409) {
+                    toast.error("Exam of this question is already published.");
                 }
             }
             const updatePromises = existingProblems.map((problem) => {
@@ -297,7 +356,6 @@ export default function ProblemSolvingForm({
 
             await Promise.all(updatePromises);
             toast.success("Problems saved successfully!");
-            onSaved();
             setSaveButton(!saveButton);
         } catch (error) {
             const err = error as AxiosError;
@@ -418,14 +476,11 @@ export default function ProblemSolvingForm({
     const currentProblemIndex = currentPage * problemsPerPage;
     const [saveButton, setSaveButton] = useState(false);
     return (
-        <div>
-            <Form
-                className="w-full flex flex-col gap-4 p-5 border-none"
-                onSubmit={handleSaveProblem}
-            >
-                <Card className="w-full border-none shadow-none bg-white dark:bg-[#18181b]">
-                    <h2 className="w-full flex justify-center text-2xl my-3">
-                        Problem Solving Question : {currentProblemIndex + 1}
+        <div className="w-full">
+            <Form onSubmit={handleSaveProblem}>
+                <Card className="w-full flex flex-col gap-4 p-5 border-none border-none shadow-none bg-white dark:bg-[#18181b]">
+                    <h2 className="text-center text-2xl my-5">
+                        Problem Solving Question: {currentProblemIndex + 1}
                     </h2>
                     <div className="w-full flex flex-col justify-center p-4">
                         {currentProblems.map((problem, index) => (
@@ -485,9 +540,26 @@ export default function ProblemSolvingForm({
                                             currentProblemIndex + index
                                         )
                                     }
+                                    onFocus={onFocus}
+                                    onBlur={onBlur}
                                 />
+
+                                <hr className="my-6 border-t border-gray-100 dark:border-gray-500" />
+
                                 <div className="flex w-full justify-between mt-5">
-                                    <div className=''><AiButton onPress={handleAiResponse} loading={isGenerating}/></div>
+                                    <div>
+                                        <AIGenerateButton
+                                            isGenerating={isGenerating}
+                                            onGenerate={handleGenerate}
+                                        />
+                                        {generatedContent && (
+                                            <div className="p-4 mt-6 border rounded-lg bg-content2 border-default-200">
+                                                <p className="text-foreground">
+                                                    {generatedContent}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                     <FormFooter
                                         totalPages={totalPages}
                                         currentPage={currentPage}

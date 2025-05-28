@@ -27,6 +27,7 @@ export interface ExistingQuestion {
 export interface WrittenQuestionFormProps {
     readonly examId: string;
     readonly existingQuestions: ExistingQuestion[];
-    readonly onSaved: () => void;
     readonly writtenPoints: (points: number) => void;
+    onFocus: () => void;
+    onBlur: () => void;
 }

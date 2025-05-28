@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getAuthToken, removeAuthToken } from './auth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localhost:9999'
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://localhost:9998'
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: {
@@ -26,28 +26,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
-
+    const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      try {
-        if (typeof window !== 'undefined') {
-          removeAuthToken()
-          window.location.href = '/'
-        }
-        return Promise.reject(new Error('Session expired. Please log in again.'))
-      } catch {
-        if (typeof window !== 'undefined') {
-          removeAuthToken()
-          window.location.href = '/'
-        }
-        return Promise.reject(new Error('Authentication failed. Please log in again.'))
+      originalRequest._retry = true;
+      if (typeof window !== 'undefined') {
+        removeAuthToken();
+        window.location.href = '/';
       }
+      return Promise.reject(new Error('Session expired. Please log in again.'));
     }
-    const errorMessage = error.response?.data?.message ?? error.message ?? 'An unexpected error occurred'
-    return Promise.reject(new Error(errorMessage))
+    const errorMessage = error.response?.data?.message ?? error.message ?? 'An unexpected error occurred';
+    return Promise.reject(new Error(errorMessage));
   }
-)
+);
+
 
 export default api

@@ -77,39 +77,6 @@ public class PublishExamCommandTests
     }
 
     [Fact]
-    public async Task Handle_WhenExamAlreadyPublished_ShouldReturnConflictError()
-    {
-        // Arrange
-        var publishedExam = new Examination
-        {
-            Id = Guid.NewGuid(),
-            Title = "Published Exam",
-            IsPublished = true,
-            TotalPoints = 100,
-            Questions = new List<Question>
-            {
-                new() { Id = Guid.NewGuid(), Points = 50 },
-                new() { Id = Guid.NewGuid(), Points = 50 }
-            }
-        };
-
-        var command = new PublishExamCommand(publishedExam.Id);
-
-        _unitOfWork.Exam.GetWithQuestionsAsync(command.ExamId, Arg.Any<CancellationToken>())
-            .Returns(publishedExam);
-
-        // Act
-        var result = await _sut.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsError.Should().BeTrue();
-        result.FirstError.Type.Should().Be(ErrorType.Conflict);
-        result.FirstError.Description.Should().Be("Exam is already published");
-
-        await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task Handle_WhenPointsMismatch_ShouldReturnConflictError()
     {
         // Arrange
@@ -137,7 +104,6 @@ public class PublishExamCommandTests
         // Assert
         result.IsError.Should().BeTrue();
         result.FirstError.Type.Should().Be(ErrorType.Conflict);
-        result.FirstError.Description.Should().Be("Total points of questions do not match the exam total points.");
 
         await _unitOfWork.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }

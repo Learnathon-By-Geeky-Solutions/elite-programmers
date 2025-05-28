@@ -19,22 +19,22 @@ export default function Component() {
         >
           <NavbarContent className=" h-11 gap-5 rounded-full bg-[#ffffff] px-4 dark:bg-[#18181b]  px-4 " justify="end">
             <NavbarItem>
-              <Link className="text-[#3f3f46] dark:text-white" href="/">
+              <Link className="text-[#3f3f46] dark:text-white" href="javascript:void(0)">
                 About Us
               </Link>
             </NavbarItem>
             <NavbarItem>
-              <Link className="text-[#3f3f46] dark:text-white" href="/">
+              <Link className="text-[#3f3f46] dark:text-white" href="javascript:void(0)">
                 Contact
               </Link>
             </NavbarItem>
             <NavbarItem>
-              <Link className="text-[#3f3f46] dark:text-white" href="/">
+              <Link className="text-[#3f3f46] dark:text-white" href="javascript:void(0)">
                 Support
               </Link>
             </NavbarItem>
             <NavbarItem>
-              <Link className="text-[#3f3f46] dark:text-white" href="/">
+              <Link className="text-[#3f3f46] dark:text-white" href="javascript:void(0)">
                 FAQs
               </Link>
             </NavbarItem>
@@ -43,7 +43,7 @@ export default function Component() {
             <NavbarItem className="text-[#3f3f46] dark:text-white ">
               <ThemeSwitch />
             </NavbarItem>
-           
+
           </NavbarContent>
         </Navbar>
       </div>

@@ -20,10 +20,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {!path.includes('userprofile') && (
           <div className="flex flex-col items-center gap-4 flex-1">
             <div className="flex items-center gap-2 text-2xl">
-              <Logo />
+              <Logo size={40} textsz={'text-4xl'}/>
             </div>
             <div className="flex flex-col items-center justify-center text-5xl font-bold ">
-              <p> Your Secure Platform</p>
+              <p>Your Secure Platform</p>
               <p>for Assessments</p>
             </div>
             <p className="text-[#71717A] max-w-md text-center">
@@ -36,9 +36,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </div>
       <footer className="w-full px-5 py-4 ">
         <div className="flex justify-between items-center text-gray-400">
-          <p>© 2025 TrueTest. All rights reserved.</p>
+          <p>&copy; 2025 TrueTest. All rights reserved.</p>
           <p>
-            Contact Us : <Link href="#">support@truetest.com</Link>
+            Contact Us: <Link href="mailto:support@truetest.tech">support@truetest.tech</Link>
           </p>
         </div>
       </footer>

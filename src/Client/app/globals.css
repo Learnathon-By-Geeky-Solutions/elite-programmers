@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 html {
     height: 100%;
@@ -17,7 +17,23 @@ html.light {
 html.dark {
     color: #ffffff;
 }
+.mermaid {
+    background: white;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
 
+[data-color-mode="dark"] .mermaid {
+    background: #1e1e1e;
+}
+
+.katex-error {
+    color: #ff5555;
+    background: rgba(255, 85, 85, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
 body {
     height: 100%;
     margin: 0;
@@ -28,9 +44,28 @@ body {
     padding: 16px;
     border-radius: 4px;
     margin: 16px 0;
-  }
-  
-  .mermaid-container svg {
+}
+
+.mermaid-container svg {
     max-width: 100%;
     height: auto;
-  }
+}
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.2); 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}

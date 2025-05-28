@@ -88,21 +88,23 @@ public class AiPromptController(IMediator mediator) : BaseApiController
     [EndpointDescription("Reviews a problem submission using AI.")]
     public async Task<IActionResult> ReviewProblemSubmission(Guid problemSubmissionId)
     {
-        var response = await _mediator.Send(new AiReviewProblemQuery(problemSubmissionId));
+        var query = new AiReviewProblemQuery(problemSubmissionId);
+        var response = await _mediator.Send(query);
         return ToResult(response);
     }
 
     /// <summary>
     /// Reviews a written submission using AI.
     /// </summary>
-    /// <param name="query">The query containing the ID of the written submission to review.</param>
+    /// <param name="submissionId">The ID of the written submission to review.</param>
     /// <returns>An IActionResult representing the AI review of the written submission.</returns>
-    [HttpPost("Review/WrittenSubmission/{examSubmissionId}")]
+    [HttpPost("Review/WrittenSubmission/{submissionId}")]
     [ProducesResponseType<AiSubmissionReview>(Status200OK)]
     [ProducesResponseType<NotFoundResponse>(Status404NotFound)]
     [EndpointDescription("Reviews a written submission using AI.")]
-    public async Task<IActionResult> ReviewWrittenSubmission(AiReviewWrittenQuery query)
+    public async Task<IActionResult> ReviewWrittenSubmission(Guid submissionId)
     {
+        var query = new AiReviewWrittenQuery(submissionId);
         var response = await _mediator.Send(query);
         return ToResult(response);
     }

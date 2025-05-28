@@ -2,5 +2,5 @@
 
 public record AiSubmissionReview(
     string Review,
-    int Score
+    decimal Score
 );

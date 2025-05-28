@@ -12,7 +12,7 @@ import {
     formatTimeHourMinutes,
 } from "@/components/DateTimeFormat";
 import { useRouter } from "next/navigation";
-import { viewExam } from '@/components/types/exam'
+import { viewExam } from "@/components/types/exam";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -172,50 +172,50 @@ export default function ViewExam() {
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Duration:{" "}
+                                            Duration:
                                         </span>
-                                        {formatTimeHourMinutes(
+                                        {" "}{formatTimeHourMinutes(
                                             exam.durationMinutes
-                                        )}{" "}
+                                        )}
                                         hr
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Starts at:{" "}
+                                            Starts at:
                                         </span>
-                                        {convertUtcToLocalTime(exam.opensAt)}
+                                        {" "}{convertUtcToLocalTime(exam.opensAt)}
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Closes at:{" "}
+                                            Closes at:
                                         </span>
-                                        {convertUtcToLocalTime(exam.closesAt)}
+                                        {" "}{convertUtcToLocalTime(exam.closesAt)}
                                     </p>
                                 </div>
                                 <div className="flex flex-col flex-1">
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Problem Solving:{" "}
+                                            Problem Solving:
                                         </span>
-                                        {exam.problemSolvingPoints}
+                                        {" "}{exam.problemSolvingPoints}
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Written:{" "}
+                                            Written:
                                         </span>
-                                        {exam.writtenPoints}
+                                        {" "}{exam.writtenPoints}
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            MCQ:{" "}
+                                            MCQ:
                                         </span>
-                                        {exam.mcqPoints}
+                                        {" "}{exam.mcqPoints}
                                     </p>
                                     <p>
                                         <span className="text-[#71717a] dark:text-white">
-                                            Score:{" "}
-                                        </span>{" "}
-                                        {exam.totalPoints}
+                                            Score:
+                                        </span>
+                                        {" "}{exam.totalPoints}
                                     </p>
                                 </div>
                             </div>
