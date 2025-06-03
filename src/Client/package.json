@@ -20,7 +20,7 @@
     "@hookform/resolvers": "^5.0.0",
     "@iconify/react": "^5.2.0",
     "@monaco-editor/react": "^4.7.0",
-    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-label": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@types/uuidv4": "^2.0.0",
     "@uiw/react-markdown-preview": "^5.1.3",
